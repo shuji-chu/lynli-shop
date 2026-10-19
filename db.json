@@ -1,0 +1,10 @@
+{
+  "products": [
+    { "id": "p1", "name": "静音震动跳蛋", "price": 129, "stock": 100, "emoji": "🩷", "desc": "超静音 · 10频震动 · 亲肤硅胶" },
+    { "id": "p2", "name": "双头震动棒", "price": 259, "stock": 50, "emoji": "🪄", "desc": "G点刺激 · 防水设计 · 磁吸充电" },
+    { "id": "p3", "name": "男士飞机杯", "price": 189, "stock": 80, "emoji": "🥃", "desc": "通道紧致 · 易清洗 · 柔软TPE" },
+    { "id": "p4", "name": "情侣共震器", "price": 299, "stock": 30, "emoji": "💞", "desc": "双人互动 · 远程遥控 · U型佩戴" },
+    { "id": "p5", "name": "润滑液 100ml", "price": 49, "stock": 200, "emoji": "💧", "desc": "水溶性 · 不粘腻 · 易清洗" }
+  ],
+  "orders": []
+}

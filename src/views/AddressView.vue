@@ -1,9 +1,6 @@
 <template>
   <div class="address-page">
-    <!-- 页面顶部导航（为了不跟全局导航栏打架，直接去掉多余 header，只留一个内部返回或标题，或者完全依赖全局导航栏） -->
-    <!-- 如果是从结算页跳过来的，顶部可以用底部导航返回，这里加个垫高层防遮挡 -->
-    
-    <!-- 1. 空状态：直接放在屏幕中间，超大按钮 -->
+    <!-- 1. 空状态 -->
     <div v-if="addresses.length === 0" class="empty-state">
       <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="60" cy="60" r="50" fill="#f0f7ff"/>
@@ -27,7 +24,6 @@
           <span class="tag" v-if="addr.is_default == 1">默认</span>
           <span class="tag orange" v-if="addr.tag">{{ addr.tag }}</span>
         </div>
-        <!-- 编辑按钮 -->
         <div class="edit-icon" v-if="!isSelectMode" @click.stop="openEdit(addr)">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#94a3b8" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </div>
@@ -35,23 +31,25 @@
       <div class="end">到底啦</div>
     </div>
 
-    <!-- 3. 底部固定新增按钮（有地址时显示） -->
     <div class="bottom-btn-wrap" v-if="addresses.length > 0">
       <button class="big-add-btn" @click="openAdd">+ 新增收货地址</button>
     </div>
 
-    <!-- 新增/编辑弹窗 -->
+    <!-- 3. 新增/编辑弹窗 -->
     <div class="modal-mask" v-if="showModal" @click.self="showModal = false">
       <div class="modal-content">
         <h3>{{ isEdit ? '编辑地址' : '新增地址' }}</h3>
         <input v-model="form.name" placeholder="收货人姓名" class="input" />
-        <input v-model="form.phone" placeholder="手机号码" class="input" />
+        <input v-model="form.phone" type="tel" placeholder="手机号码" class="input" />
         <input v-model="form.province" placeholder="省 / 直辖市" class="input" />
         <input v-model="form.city" placeholder="市 / 区" class="input" />
         <input v-model="form.detail" placeholder="详细地址（如街道、门牌号）" class="input" />
+        
         <div class="default-checkbox" @click="form.is_default = form.is_default ? 0 : 1">
-          <div class="check" :class="{ active: form.is_default }"></div> 设为默认地址
+          <div class="check" :class="{ active: form.is_default }"></div> 
+          <span>设为默认地址</span>
         </div>
+        
         <div class="modal-btns">
           <button v-if="isEdit" @click.stop="deleteAddr(form.id)" class="del-btn">删除</button>
           <button @click.stop="saveAddr" class="save-btn">保存</button>
@@ -131,18 +129,16 @@ const deleteAddr = async (id) => {
 </script>
 
 <style scoped>
-/* 给顶部留出导航栏高度 */
 .address-page { min-height: 100vh; background: #f5f7fa; padding-top: 64px; padding-bottom: 20px; }
 
-/* 空状态居中 */
+/* 空状态 */
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 100px; }
 .empty-state svg { width: 120px; height: 120px; margin-bottom: 20px; }
 .empty-state p { font-size: 15px; color: #64748b; margin-bottom: 24px; }
 
-/* 超大按钮 */
 .big-add-btn { background: #3b82f6; color: #fff; border: none; padding: 14px 40px; border-radius: 24px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(59,130,246,0.3); cursor: pointer; }
 
-/* 列表样式 */
+/* 列表 */
 .list { padding: 0 16px; }
 .item { background: #fff; padding: 16px; position: relative; border-radius: 12px; margin-bottom: 12px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
 .addr-top { font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
@@ -152,19 +148,25 @@ const deleteAddr = async (id) => {
 .edit-icon { position: absolute; right: 16px; bottom: 16px; padding: 8px; cursor: pointer; }
 .end { text-align: center; font-size: 13px; color: #94a3b8; padding: 20px 0; }
 
-/* 底部固定按钮容器 */
-.bottom-btn-wrap { position: fixed; bottom: 20px; left: 0; right: 0; display: flex; justify-content: center; z-index: 10; }
+.bottom-btn-wrap { position: fixed; bottom: 80px; left: 0; right: 0; display: flex; justify-content: center; z-index: 10; }
 
-/* 弹窗样式 */
-.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-end; z-index: 100; }
-.modal-content { width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 20px; animation: slideUp 0.3s; }
+/* 🚨 核心修复：把弹窗层级拉到最高，并留出底部空间 */
+.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-end; z-index: 9999; } /* 比导航栏和客服都要高 */
+.modal-content { 
+  width: 100%; 
+  background: #fff; 
+  border-radius: 20px 20px 0 0; 
+  padding: 20px; 
+  padding-bottom: calc(20px + env(safe-area-inset-bottom) + 60px); /* 🚨 给底部导航栏让出 60px 的安全距离 */
+  animation: slideUp 0.3s; 
+}
 .modal-content h3 { margin: 0 0 16px; text-align: center; font-size: 16px; }
 .input { width: 100%; border: 1px solid #eee; border-radius: 8px; padding: 12px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background: #f8fafc; }
 .default-checkbox { display: flex; align-items: center; gap: 8px; font-size: 14px; margin: 10px 0 20px; cursor: pointer; color: #334155; }
 .check { width: 18px; height: 18px; border-radius: 50%; border: 1px solid #ccc; }
 .check.active { background: #3b82f6; border-color: #3b82f6; }
 .modal-btns { display: flex; gap: 10px; }
-.save-btn { flex: 1; background: #3b82f6; color: #fff; border: none; padding: 12px; border-radius: 20px; font-size: 15px; font-weight: bold; }
-.del-btn { background: #fee2e2; color: #ef4444; border: none; padding: 0 20px; border-radius: 20px; font-size: 15px; font-weight: bold; }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.save-btn { flex: 1; background: #3b82f6; color: #fff; border: none; padding: 14px; border-radius: 20px; font-size: 16px; font-weight: bold; }
+.del-btn { background: #fee2e2; color: #ef4444; border: none; padding: 0 20px; border-radius: 20px; font-size: 16px; font-weight: bold; }
+@keyframes slideUp { from { transform: translateY(100%); } until { transform: translateY(0); } }
 </style>

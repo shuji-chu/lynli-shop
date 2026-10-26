@@ -1,47 +1,57 @@
 <template>
-  <div class="container home">
-    <!-- 🎨 柔美透亮背景 -->
+  <!-- 🚨 新增了点击空白处关闭历史记录的逻辑 -->
+  <div class="container home" @click="showHistory = false">
+    
+    <!-- 🎨 柔美透亮背景 (固定在底层) -->
     <div class="soft-bg">
       <div class="glow glow-pink"></div>
       <div class="glow glow-blue"></div>
       <div class="glow glow-peach"></div>
     </div>
 
-    <!-- 🔍 搜索框 -->
-    <div class="search-wrap">
+    <!-- 🔍 搜索框与历史记录 -->
+    <div class="search-wrap" @click.stop>
       <div class="search-box">
         <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input v-model="keyword" type="text" placeholder="搜索商品 / 分类..." @keyup.enter="handleSearch" @focus="showHistory = true" />
+        <input 
+          v-model="keyword" 
+          type="text" 
+          placeholder="搜索商品 / 分类..." 
+          @keyup.enter="handleSearch" 
+          @focus="showHistory = true" 
+        />
         <span v-if="keyword" class="clear-btn" @click="keyword = ''">×</span>
       </div>
+      
       <!-- 搜索历史 -->
       <div class="history-wrap" v-if="historyList.length > 0 && showHistory && !keyword">
-        <div class="history-header"><span>搜索历史</span><span class="clear-history" @click="clearHistory">清空</span></div>
+        <div class="history-header">
+          <span>搜索历史</span>
+          <span class="clear-history" @click="clearHistory">清空</span>
+        </div>
         <div class="history-tags">
           <span v-for="(item, index) in historyList" :key="index" class="tag" @click="clickHistory(item)">{{ item }}</span>
         </div>
       </div>
     </div>
 
-    <!-- 🎯 顶部分类图标导航 (横向滑动) -->
+    <!-- 🎯 顶部分类图标导航 -->
     <div class="category-nav">
       <div class="cat-item" v-for="cat in categories" :key="cat.name" @click="selectCategory(cat.name)">
         <div class="cat-icon" :style="{ background: cat.color }">
-          <!-- 纯代码 SVG 占位图标，你可以换成自己设计的图 -->
           <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
         </div>
         <span>{{ cat.name }}</span>
       </div>
     </div>
 
-    <!-- 🖼️ 高级 Banner 轮播图 -->
+    <!-- 🖼️ 高级 Banner -->
     <div class="banner">
       <div class="banner-content">
         <h2>探索边界 · 释放真我</h2>
         <p>高端私密好物 满 299 顺丰包邮</p>
         <button class="banner-btn">立即选购</button>
       </div>
-      <!-- 背景装饰光晕 -->
       <div class="banner-deco"></div>
     </div>
 
@@ -56,7 +66,7 @@
 
     <!-- 加载更多 -->
     <div class="load-more-wrap" v-if="hasMore && !loading && !keyword && !activeCategory">
-      <button class="load-more-btn" @click="loadMore">加载更多好物</button>
+      <button class="load-more-btn" @click.stop="loadMore">加载更多好物</button>
     </div>
   </div>
 </template>
@@ -71,9 +81,8 @@ const loading = ref(false)
 const page = ref(1)
 const hasMore = ref(true)
 const keyword = ref('')
-const activeCategory = ref('') // 当前选中的分类
+const activeCategory = ref('')
 
-// 自定义分类数据
 const categories = [
   { name: '全部', color: '#3b82f6' },
   { name: '情趣玩具', color: '#ec4899' },
@@ -82,7 +91,6 @@ const categories = [
   { name: '情侣共震', color: '#10b981' }
 ]
 
-// 搜索历史
 const showHistory = ref(false)
 const historyList = ref(JSON.parse(localStorage.getItem('lynli_search_history') || '[]'))
 
@@ -96,21 +104,13 @@ function handleSearch() {
 function clickHistory(item) { keyword.value = item; handleSearch() }
 function clearHistory() { historyList.value = []; localStorage.removeItem('lynli_search_history') }
 
-// 点击分类过滤
 function selectCategory(catName) {
-  if (catName === '全部') {
-    activeCategory.value = ''
-  } else {
-    activeCategory.value = activeCategory.value === catName ? '' : catName
-  }
+  activeCategory.value = catName === '全部' ? '' : (activeCategory.value === catName ? '' : catName)
 }
 
-// 综合过滤：分类 + 关键词
 const filteredList = computed(() => {
   let list = products.value
-  if (activeCategory.value) {
-    list = list.filter(p => p.category === activeCategory.value)
-  }
+  if (activeCategory.value) list = list.filter(p => p.category === activeCategory.value)
   if (keyword.value.trim()) {
     const kw = keyword.value.toLowerCase().trim()
     list = list.filter(p => 
@@ -139,10 +139,20 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.home { padding-top: 56px; padding-bottom: 20px; min-height: 100vh; background: #f8fafc; position: relative; overflow: hidden; }
+/* 🚨 核心修复：高度 100vh 并允许纵向平滑滑动 */
+.home { 
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; /* iOS 丝滑滚动 */
+  padding-top: 56px; 
+  padding-bottom: 80px; /* 留出底部导航栏的空间 */
+  background: #f8fafc; 
+  position: relative; 
+}
 
-/* 背景光晕 */
-.soft-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+/* 背景光晕：固定不动 */
+.soft-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .glow { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; }
 .glow-pink { width: 350px; height: 400px; background: #fbcfe8; top: -80px; right: -100px; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: floatGlow 8s infinite alternate ease-in-out; }
 .glow-blue { width: 300px; height: 350px; background: #bfdbfe; bottom: 200px; left: -100px; border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; animation: floatGlow 10s infinite alternate-reverse ease-in-out; }
@@ -185,10 +195,4 @@ onMounted(loadData)
 .loading-text, .empty { text-align: center; padding: 40px 0; color: #94a3b8; font-size: 14px; }
 .load-more-wrap { text-align: center; padding: 20px 0 40px; position: relative; z-index: 2; }
 .load-more-btn { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; padding: 10px 30px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; }
-
-@media (min-width: 768px) {
-  .grid { column-count: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
-  .grid > * { margin-bottom: 0; }
-  .banner h2 { font-size: 28px; }
-}
 </style>

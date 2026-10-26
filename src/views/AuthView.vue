@@ -293,7 +293,7 @@ const submit = async () => {
       
       if (token) { 
         localStorage.setItem('token', token)
-        if (userInfo) localStorage.setItem('userInfo', JSON.stringify(userInfo))
+        localStorage.setItem('userInfo', JSON.stringify(finalUserInfo))
         router.push('/shop') 
       } else { 
         // 🚨 重点：如果没拿到 token，把服务器返回的原始数据打出来给你看！

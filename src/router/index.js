@@ -1,39 +1,38 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
+  { path: '/auth', name: 'auth', component: () => import('@/views/AuthView.vue') },
   { path: '/', name: 'home', component: () => import('@/views/HomeView.vue') },
   { path: '/product/:id', name: 'product', component: () => import('@/views/ProductDetailView.vue') },
   { path: '/cart', name: 'cart', component: () => import('@/views/CartView.vue') },
   { path: '/checkout', name: 'checkout', component: () => import('@/views/CheckoutView.vue') },
-  { path: '/auth', name: 'auth', component: () => import('@/views/AuthView.vue') },
-  { path: '/pay', name: 'pay', component: () => import('@/views/PayView.vue') },
-  { path: '/success', name: 'success', component: () => import('@/views/PaySuccessView.vue') },
   { path: '/orders', name: 'orders', component: () => import('@/views/OrdersView.vue') },
-  { path: '/:pathMatch(.*)*', redirect: '/' }
+  { path: '/:pathMatch(.*)*', redirect: '/auth' }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior() {
-    return { top: 0 }
-  }
 })
 
-// ===== 绝对强硬的路由守卫 =====
+// 全局白名单，只有 /auth 不需要登录
+const whiteList = ['/auth']
+
 router.beforeEach((to, from, next) => {
-  // 尝试从本地拿 token（兼容不同字段名）
-  const token = localStorage.getItem('token') || localStorage.getItem('access_token')
+  const token = localStorage.getItem('token')
   
-  if (to.path !== '/auth' && !token) {
-    // 没登录，去哪都给你踢回登录页
-    next('/auth')
-  } else if (to.path === '/auth' && token) {
-    // 已登录还想去登录页，踢回首页
-    next('/')
+  if (token) {
+    if (to.path === '/auth') {
+      next('/') // 有 token 就不去登录页
+    } else {
+      next()
+    }
   } else {
-    // 正常放行
-    next()
+    if (whiteList.includes(to.path)) {
+      next() // 白名单直接放行
+    } else {
+      next('/auth') // 没 token 强制踢回登录页
+    }
   }
 })
 

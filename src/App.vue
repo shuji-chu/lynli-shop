@@ -1,9 +1,9 @@
 <template>
-  <template v-if="$route.path !== '/'">
+  <!-- 🚨 核心修复：只有在首页、购物车、我的这三个主页面，才显示顶部导航栏和底部Tab -->
+  <template v-if="['/shop', '/cart', '/orders'].includes($route.path)">
     <NavBar />
   </template>
 
-  <!-- 彻底删除顶部的 padding-top -->
   <main class="page" :class="{ 'is-auth': $route.path === '/' }">
     <router-view v-slot="{ Component }">
       <keep-alive :include="['HomeView', 'OrdersView', 'CartView']">
@@ -12,8 +12,12 @@
     </router-view>
   </main>
 
-  <template v-if="$router.path !== '/'">
+  <template v-if="['/shop', '/cart', '/orders'].includes($route.path)">
     <BottomNav />
+  </template>
+  
+  <!-- Toast 和 客服是全局的，一直保留 -->
+  <template v-if="$route.path !== '/'">
     <Toast />
     <ChatWidget />
   </template>
@@ -27,17 +31,7 @@ import ChatWidget from '@/components/ChatWidget.vue'
 </script>
 
 <style>
-.page { 
-  min-height: 100vh; 
-  box-sizing: border-box; 
-  /* 移除所有 padding-top */
-  padding-bottom: 70px;
-}
-.page.is-auth { padding-bottom: 0; }
-
-@media (max-width: 640px) {
-  .page { padding-bottom: 80px; }
-  .page.is-auth { padding-bottom: 0; }
-}
+.page { min-height: 100vh; box-sizing: border-box; }
+.page.is-auth { padding: 0; }
 .fade-enter-active, .fade-leave-to { transition: opacity 0.25s ease; }
 </style>

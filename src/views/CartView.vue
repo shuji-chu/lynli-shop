@@ -22,7 +22,7 @@
           </div>
           <div class="mid">
             <p class="name">{{ item.title }}</p>
-            <p class="price">{{ formatPrice(item.price) }}</p>
+            <p class="price">{{ formatPrice(markupPrice(item.price)) }}</p>
           </div>
           <div class="right">
             <div class="stepper">
@@ -75,6 +75,7 @@ import {
   allSelected
 } from '@/store/cart'
 import { formatPrice } from '@/utils/format'
+import { markupPrice } from '@/utils/price'
 import { Toast } from '@/utils/toast'
 
 const router = useRouter()

@@ -13,9 +13,9 @@
           <img :src="item.image" :alt="item.title" loading="lazy" @error="onErr" />
           <div class="info">
             <p class="name">{{ item.title }}</p>
-            <p class="price">{{ formatPrice(item.price) }} × {{ item.qty }}</p>
+            <p class="price">{{ formatPrice(markupPrice(item.price)) }} × {{ item.qty }}</p>
           </div>
-          <span class="sub">{{ formatPrice(item.price * item.qty) }}</span>
+          <span class="sub">{{ formatPrice(markupPrice(item.price * item.qty)) }}</span>
         </li>
       </ul>
 
@@ -51,6 +51,11 @@
             <span class="m-name">USDT 加密货币</span>
             <span class="m-desc">链上充值 · 隐私友好</span>
           </label>
+          <label class="method wechat" :class="{ active: method === 'wechat' }">
+            <input type="radio" value="wechat" v-model="method" />
+            <span class="m-name">微信支付 <i class="soon">即将开通</i></span>
+            <span class="m-desc">敬请期待</span>
+          </label>
         </div>
       </section>
 
@@ -59,7 +64,7 @@
           应付：<b>{{ formatPrice(selectedTotal) }}</b>
         </div>
         <button class="btn-gold" :disabled="submitting" @click="submit">
-          {{ submitting ? '提交中…' : '提交订单' }}
+          {{ submitting ? '提交中…' : (method === 'wechat' ? '微信支付即将开通' : '提交订单') }}
         </button>
       </div>
     </template>
@@ -74,6 +79,7 @@ import { createOrder } from '@/api/order'
 import { isLoggedIn } from '@/store/user'
 import { Toast } from '@/utils/toast'
 import { formatPrice } from '@/utils/format'
+import { markupPrice, markupTotal } from '@/utils/price'
 
 const router = useRouter()
 const method = ref('alipay')
@@ -99,7 +105,17 @@ async function submit() {
     items: selectedItems.value.map((i) => ({ id: i.id, qty: i.qty })),
     address: form.address,
     contact: `${form.name} ${form.phone}`,
-    method: method.value
+    method: method.value,
+    // 金额一致性红线：携带上浮 35% 后的应付总额（经价格中枢计算）。
+    // 后端当前按 shop_products.price 落单（见 guanli/api_shop.py），
+    // 此处传 amount 为前向兼容——后端一旦按前端金额取值即自动一致。
+    amount: Number(markupTotal(selectedItems.value).toFixed(2))
+  }
+
+  // 微信支付预留：暂未开通，点击提示而不落地下单
+  if (method.value === 'wechat') {
+    Toast.info('微信支付即将开通，敬请期待')
+    return
   }
 
   submitting.value = true
@@ -200,7 +216,20 @@ async function submit() {
 }
 .method.active {
   border-color: var(--gold);
-  background: rgba(212, 175, 107, 0.1);
+  background: rgba(47, 107, 224, 0.1);
+}
+.method.wechat {
+  opacity: 0.85;
+}
+.soon {
+  font-style: normal;
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 7px;
+  color: #fff;
+  background: var(--text-3);
+  margin-left: 4px;
+  vertical-align: middle;
 }
 .method input {
   position: absolute;

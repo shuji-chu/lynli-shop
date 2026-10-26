@@ -1,8 +1,14 @@
 <template>
-  <!-- 高级蓝白动态人物剪影背景 -->
+  <!-- 核心背景容器 -->
   <div class="login-wrapper">
-    <div class="bg-shape shape1"></div>
-    <div class="bg-shape shape2"></div>
+    
+    <!-- 🎬 在线动态女性剪影视频背景（免版权，打开直接播放） -->
+    <video autoplay muted loop playsinline class="bg-video">
+      <source src="https://cdn.pixabay.com/video/2022/10/14/135090-760345192_large.mp4" type="video/mp4" />
+    </video>
+
+    <!-- 🎨 蓝白渐变遮罩（把视频染成高级的蓝白品牌色） -->
+    <div class="bg-overlay"></div>
     
     <!-- 登录卡片 -->
     <div class="login-card">
@@ -37,13 +43,13 @@
           </div>
         </div>
 
-        <!-- 记住密码 (仅在登录时显示) -->
+        <!-- 记住密码 -->
         <div v-if="mode === 'login'" style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #64748b;">
           <input type="checkbox" v-model="rememberMe" id="remember" style="cursor: pointer;" />
           <label for="remember" style="cursor: pointer;">记住密码</label>
         </div>
 
-        <button type="submit" style="background:#3b82f6;color:#fff;border:none;padding:15px;border-radius:10px;font-size:16px;font-weight:bold;margin-top:10px;">
+        <button type="submit" style="background:#3b82f6;color:#fff;border:none;padding:15px;border-radius:10px;font-size:16px;font-weight:bold;margin-top:10px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);">
           {{ mode === 'login' ? '立即登录' : mode === 'register' ? '注册并登录' : '重置密码' }}
         </button>
       </form>
@@ -59,7 +65,7 @@
     </div>
 
     <!-- 底部隐私协议 -->
-    <div style="margin-top: 30px; font-size: 12px; color: #94a3b8; text-align: center; z-index: 10;">
+    <div style="margin-top: 30px; font-size: 12px; color: #94a3b8; text-align: center; z-index: 10; position: relative;">
       登录即代表同意 
       <a @click.prevent="openModal('privacy')" href="#" style="color:#3b82f6; text-decoration:none;">《用户隐私协议》</a> 和 
       <a @click.prevent="openModal('terms')" href="#" style="color:#3b82f6; text-decoration:none;">《服务条款》</a>
@@ -73,7 +79,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import PrivacyModal from '@/components/PrivacyModal.vue' // 引入刚建的弹窗组件
+import PrivacyModal from '@/components/PrivacyModal.vue'
 
 const router = useRouter()
 const mode = ref('login')
@@ -104,13 +110,13 @@ const generateCaptcha = () => {
 
 onMounted(() => {
   generateCaptcha()
-  // 自动识别：如果本地存了 token，直接踢去商城
+  // 🔥 自动识别：老用户直接进商城
   const token = localStorage.getItem('token')
   if (token && token !== 'undefined' && token !== 'null') {
     router.replace('/shop')
   }
   
-  // 记住密码回填
+  // 🔥 记住密码回填
   const savedEmail = localStorage.getItem('saved_email')
   const savedPwd = localStorage.getItem('saved_pwd')
   if (savedEmail && savedPwd) {
@@ -186,7 +192,7 @@ const submit = async () => {
         return
       }
       
-      // 处理记住密码逻辑
+      // 记住密码逻辑
       if (mode.value === 'login') {
         if (rememberMe.value) {
           localStorage.setItem('saved_email', form.email)
@@ -197,13 +203,12 @@ const submit = async () => {
         }
       }
 
-      // 处理登录/注册成功的数据同步 (用户ID、昵称、头像)
+      // 🔥 数据同步 (用户ID、昵称、头像存入本地)
       const token = data?.data?.token || data?.token || data?.access_token
       const userInfo = data?.data?.user || data?.data?.userInfo || data?.user
       
       if (token) { 
         localStorage.setItem('token', token)
-        // 🔥 如果后端返回了用户信息，全部存入本地，供管理面板使用
         if (userInfo) {
           localStorage.setItem('userInfo', JSON.stringify(userInfo))
         }
@@ -221,7 +226,7 @@ const submit = async () => {
 </script>
 
 <style scoped>
-/* 登录页外层，带蓝白渐变 */
+/* 登录页外层 */
 .login-wrapper {
   position: relative;
   min-height: 100vh;
@@ -229,54 +234,43 @@ const submit = async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e0f2fe 0%, #f8fafc 100%);
+  background: #e0f2fe; /* 兜底蓝底 */
   overflow: hidden;
 }
 
-/* 登录卡片样式 */
+/* 🎬 视频背景样式 */
+.bg-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  z-index: 0;
+  filter: blur(1.5px); /* 微微模糊，高级感 */
+}
+
+/* 🎨 蓝白遮罩层 */
+.bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(224, 242, 254, 0.7) 0%, rgba(147, 197, 253, 0.4) 100%);
+  z-index: 1;
+}
+
+/* 登录卡片样式（毛玻璃效果） */
 .login-card {
   width: 90%;
   max-width: 380px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.85); /* 半透明 */
+  backdrop-filter: blur(15px); /* 玻璃模糊 */
   padding: 40px 30px 30px;
   border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(30, 58, 138, 0.08);
+  box-shadow: 0 20px 40px rgba(30, 58, 138, 0.1);
   z-index: 10;
-  border: 1px solid rgba(255,255,255,0.6);
-}
-
-/* ---- 性感女性剪影 / 抽象流动蓝白特效 ---- */
-.bg-shape {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  z-index: 1;
-  opacity: 0.6;
-  animation: float 8s infinite ease-in-out alternate;
-}
-
-.shape1 {
-  width: 300px;
-  height: 400px;
-  background: linear-gradient(180deg, #3b82f6 0%, #93c5fd 100%);
-  top: -50px;
-  right: -50px;
-  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; /* 模拟柔和人体曲线轮廓 */
-}
-
-.shape2 {
-  width: 250px;
-  height: 350px;
-  background: linear-gradient(180deg, #1e3a8a 0%, #60a5fa 100%);
-  bottom: -50px;
-  left: -50px;
-  border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%;
-  animation-delay: -4s;
-}
-
-@keyframes float {
-  0% { transform: translateY(0) scale(1); }
-  100% { transform: translateY(20px) scale(1.05); }
+  border: 1px solid rgba(255,255,255,0.9);
 }
 </style>

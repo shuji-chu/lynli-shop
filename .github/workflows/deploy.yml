@@ -1,25 +1,51 @@
 name: Deploy to GitHub Pages
+
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
+# 允许一个并发部署，跳过在进行中的运行之间的排队运行
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
-  deploy:
+  build-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      # 核心修改：加上 enablement: true，如果没开启它会自动帮你开
-      - uses: actions/configure-pages@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
         with:
           enablement: true
-      - uses: actions/upload-pages-artifact@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
-      - uses: actions/deploy-pages@v4
+          path: "./dist"
+
+      - name: Deploy
         id: deployment
+        uses: actions/deploy-pages@v4

@@ -174,7 +174,7 @@ onBeforeUnmount(() => clearInterval(timer))
 }
 .tabs button.active {
   background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-  color: #1a1206;
+  color: #fff;
   font-weight: 600;
 }
 .form {

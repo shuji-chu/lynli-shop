@@ -1,6 +1,6 @@
 # LYNLI 微澜 · 情趣用品独立 C 端商城
 
-高端情趣用品独立商城前端。暗黑 / 黑金质感，动态氛围背景，纯前端购物车，支持支付宝与 USDT 双支付，全端自适应（PC 宽屏 + 手机 H5）。
+高端情趣用品独立商城前端。**蓝白渐变高级风 + 性感动态背景（蓝白流体水波纹 + 女性人体曲线剪影呼吸）**，白色半透明毛玻璃卡片，支持支付宝 / USDT 双支付（微信支付预留），全端自适应（PC 宽屏 + 手机 H5），纯前端购物车。
 
 > 技术栈：**Vue 3 + Vite + Vue Router**（组合式 API `<script setup>`），工程化组件化拆分，可平滑迁移至微信小程序。
 
@@ -10,12 +10,13 @@
 
 | 项 | 约定 |
 | --- | --- |
-| 代码归属 | 仅本仓库 `shuji-chu/lynli-shop`，不触碰管理端 / 后端仓库 |
+| 代码归属 | 仅本仓库 `shuji-chu/lynli-shop`，**不触碰管理端 / 后端仓库** |
 | 线上域名 | `https://www.lynli.me`（C 端站点） |
 | 接口域名 | `https://api.lynli.me`（所有数据 HTTP 请求来源） |
 | 前后端分离 | 数据一律经 HTTP 从 `api.lynli.me` 拉取，**禁止读取本地 JSON 作为假数据** |
 | 商品来源 | 后端已通过 1688 抓取铺货写入 MySQL；C 端只消费 `GET /api/products` 的真实数据 |
 | 无年龄墙 | 直接展示商品，**不出现任何「18 岁拦截」弹窗** |
+| 金额红线 | 数据库存「底价」，C 端展示价 = 底价 × 1.35，全链路经 `src/utils/price.js` 单一出口（见第六节） |
 
 ---
 
@@ -24,7 +25,7 @@
 ```
 lynli-shop/
 ├── index.html                # Vite 入口（挂载 #app）
-├── vite.config.js            # 构建 / 别名 @ / dev 代理
+├── vite.config.js            # 构建 / 别名 @ / dev 代理 / SPA 404 回退
 ├── package.json
 ├── .github/workflows/        # GitHub Pages 自动构建部署
 ├── public/
@@ -41,8 +42,10 @@ lynli-shop/
     ├── store/                # 状态（购物车 localStorage / 用户 token）
     ├── components/           # 通用组件（动态背景 / 商品卡 / 骨架 / Toast / 导航 / 支付弹窗）
     ├── views/                # 页面（首页 / 详情 / 购物车 / 结算 / 登录 / 支付 / 成功 / 订单）
-    ├── utils/                # 工具（金额格式化 / Toast 单例）
-    └── styles/global.css     # 主题变量 / Reset / 骨架屏 / 通用类
+    ├── utils/                # 工具（金额格式化 / 加价中枢 / Toast 单例）
+    │   ├── format.js         # 金额格式化、时间、脱敏
+    │   └── price.js          # ★ 加价 35% 价格中枢（唯一可信源）
+    └── styles/global.css     # 蓝白主题变量 / Reset / 骨架屏 / 通用类
 ```
 
 ---
@@ -88,7 +91,8 @@ npm run preview
    - 将 `dist/` 目录整体上传到 `www.lynli.me` 站点根目录即可（纯静态，无需服务端渲染）。
    - 注意 `vite.config.js` 中 `base: '/'` 适用于站点根路径部署；若部署到子路径，请相应调整 `base`。
 
-> 前端只消费 `https://api.lynli.me`，与 C 端站点 `www.lynli.me` 跨域已由后端 CORS 白名单放行。
+> **SPA 深链接**：`vite.config.js` 在 `closeBundle` 阶段拷贝 `index.html` 为 `404.html`，
+> 静态托管下刷新子路由不会 404。
 
 ---
 
@@ -102,8 +106,8 @@ npm run preview
 | 发送验证码 | `POST /api/v1/user/send_code` | body：`{ email }` |
 | 注册 | `POST /api/v1/auth/register` | body：`{ email, code }` |
 | 登录 | `POST /api/v1/auth/login` | body：`{ email, code }`，返回 `token` |
-| 创建订单 | `POST /api/v1/shop/order` | body：`{ items:[{id,qty}], address, contact, method }`，返回 `trade_no` |
-| 发起支付 | `POST /api/v1/user/order/pay` | body：`{ trade_no, method:'alipay'|'usdt' }`；支付宝返回二维码（`qr_url` 或待生成二维码的 `pay_url`），USDT 返回充值 `address` / `amount` / `network` |
+| 创建订单 | `POST /api/v1/shop/order` | body：`{ items:[{id,qty}], address, contact, method, amount }`，返回 `trade_no`；`amount` 为前端按底价上浮 35% 后的应付总额（前向兼容） |
+| 发起支付 | `POST /api/v1/user/order/pay` | body：`{ trade_no, method:'alipay'|'usdt'|'wechat' }`；支付宝返回二维码（`qr_url` 或待生成二维码的 `pay_url`），USDT 返回充值 `address` / `amount` / `network`；`wechat` 为微信支付 v3 预留位 |
 | 轮询查单 | `GET /api/v1/user/order/query?trade_no=xxx` | 返回 `status`（`pending` / `paid` / `closed` 等），支付成功后跳转成功页 |
 | 我的订单 | `GET /api/v1/user/orders` | 登录态拉取当前用户订单 |
 
@@ -113,30 +117,78 @@ npm run preview
 
 ---
 
-## 六、工程约定
+## 六、金额一致性红线（加价 35%）
+
+**唯一的加价逻辑出口：`src/utils/price.js`**
+
+```js
+export const MARKUP_RATE = 1.35
+export function markupPrice(base)        // 单品：底价 × 1.35
+export function markupSubtotal(base, qty)// 单品多件小计
+export function markupTotal(items)       // 选中项总价（购物车 / 结算）
+```
+
+- `shop_products.price` 在后端是**底价**；前端所有展示与金额计算一律调用上述函数，
+  任何页面都**不允许**就地写 `price * 1.35`。
+- 落地位置：商品卡 `ProductCard`、详情页 `ProductDetailView`、购物车 `cart.js(selectedTotal)`、结算页 `CheckoutView`、订单提交载荷 `createOrder.payload.amount`。
+- **一致性说明**：列表价 / 详情价 / 购物车总价 / 结算应付 已由前端统一上浮 35%。
+  但**订单落单金额与支付二维码金额由后端最终决定**——当前后端 `guanli/api_shop.py` 按 `shop_products.price`（底价）落单并据此生成二维码，因此「二维码金额 = 上浮 35%」需在后端取值口径对齐后才会完全一致。前端已统一上浮并在下单时携带 `amount`，后端一旦按前端 `amount` 或按上浮价取值，全链路金额即自动一致。
+
+---
+
+## 七、UI 交互红线
+
+- **动态背景**：`DynamicBackground.vue` 用 Canvas 绘制蓝白流体水波纹（多相位正弦波带流动）+ 3 层 CSS 呼吸光晕；纯代码绘制**女性人体曲线 / 剪影 SVG**，低透明度、随波纹缓缓起伏呼吸，营造高级私密氛围（无外部图片、不低俗）。`requestAnimationFrame` 驱动、隐藏标签页自动暂停、`prefers-reduced-motion` 降级，确保流畅不卡顿。
+- **毛玻璃卡片**：白色半透明面板（`backdrop-filter: blur`），清透高级。
+- **全局原生滚动**：禁止任何局部滚动条（`scrollbar-width:none` 等），`body` 占据全局滚动，移动端取消点击高亮。
+- **图片**：`loading="lazy"` 懒加载 + 骨架屏加载态，防抖动。
+- **全端自适应**：PC 宽屏大网格 + 宽导航；手机 H5 双列瀑布流 + 底部固定导航 / 购物车。
+- **加载失败不白屏**：商品 / 详情 / 订单列表在 CORS 或网络异常时展示可重试的错误态，杜绝白屏卡死。
+
+---
+
+## 八、微信支付预留
+
+- 结算页已提供「微信支付」选项（标注「即将开通」）；点击提交时仅提示不落地下单。
+- `PayModal` 与 `PayView` 已为 `method:'wechat'` 预留分支。
+- 后端 `guanli/api_pay.py` 的支付分发按 `method` 路由，微信支付 v3 仅需后台在 `payment_configs` 增加 `wechat` 通道配置即可启用，前端无需改动。
+
+---
+
+## 九、跨域（CORS）与白屏说明（重要）
+
+- 接口地址 `https://api.lynli.me/api/products` **正确**（实测返回 200 + 合法 JSON）。
+- 后端 CORS **预检（OPTIONS）** 已正确返回 `access-control-allow-origin: https://www.lynli.me` 与 `allow-credentials: true`。
+- **已知问题**：生产环境经 Cloudflare 回源后，**实际 GET 响应缺失 `Access-Control-Allow-Origin` 响应头**（源站 CORS 中间件似乎只在预检时加头）。这会导致浏览器在 `www.lynli.me` 跨域读取接口时被拦截。
+  - 该问题位于**后端 / 边缘层**，按红线不在本仓库修改。
+  - 前端已对 CORS / 网络错误做优雅降级（错误态 + 重试），**不会白屏**。
+  - 根治需在后端 `api.lynli.me` 的实际响应（非仅 OPTIONS）补上：
+    `Access-Control-Allow-Origin: https://www.lynli.me`（凭据请求时不能用 `*`）
+    以及 `Access-Control-Allow-Credentials: true`（当请求带 `Authorization`）。
+
+---
+
+## 十、工程约定
 
 - **请求封装**：`axios` 二次封装，请求拦截器自动携带 `Authorization: Bearer <token>`；响应拦截器统一拆信封、全局错误 Toast、401 自动清登并跳转登录页。
 - **用户体系**：纯前端无感，登录后 `token` 持久化于 `localStorage`，刷新不丢失。
 - **购物车**：纯前端 `localStorage` 管理，支持加减数量、单选 / 全选、清空。
-- **UI 交互红线**
-  - 动态背景：Canvas 粒子流光 + CSS 呼吸光晕（暗红 / 黑金），`requestAnimationFrame` 驱动、隐藏标签页自动暂停、`prefers-reduced-motion` 降级，确保流畅不卡顿。
-  - **全局原生滚动**：禁止任何局部滚动条（`scrollbar-width:none` 等），`body` 占据全局滚动，移动端取消点击高亮。
-  - 图片：`loading="lazy"` 懒加载 + 骨架屏加载态，防抖动。
-  - 全端自适应：PC 宽屏大网格 + 宽导航；手机 H5 双列瀑布流 + 底部固定导航 / 购物车。
 - **健壮性**：所有接口调用均有 `try/catch` 兜底，空数据、网络异常、字段缺失均有明确分支处理，杜绝页面死机。
 
 ---
 
-## 七、环境要求
+## 十一、环境要求
 
 - Node.js ≥ 18（推荐 20 LTS）
 - npm ≥ 9
 
 ---
 
-## 八、待联调对齐项（与后端首次对接时确认）
+## 十二、待联调对齐项（与后端首次对接时确认）
 
 1. 登录 / 注册接口的真实子路径与入参（是否需要 `password`）。
 2. `GET /api/products` 的实际返回字段名（图片字段 `image` / `image_url` / `cover`，分类字段 `category` / `cat` 已做兼容）。
 3. 支付接口返回的二维码字段（`qr_url` 直接图片 or `pay_url` 生码）与 USDT 网络字段（`network`，默认 TRC20）。
 4. 订单状态枚举值（已在前端映射常见值，未知状态回退为「未知」）。
+5. **金额口径**：后端 `guanli/api_shop.py` 按 `shop_products.price` 落单；若需二维码金额 = 上浮 35%，请后端按前端提交的 `amount` 或按上浮价取值（见第六节）。
+6. **CORS 实际响应头**：补齐 `Access-Control-Allow-Origin`（见第九节），否则 `www.lynli.me` 跨域读取会被浏览器拦截。

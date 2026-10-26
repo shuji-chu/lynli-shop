@@ -17,7 +17,7 @@
       <!-- 2. 生态与拓展 (砍掉商家入驻，只留 API) -->
       <div class="section-title">生态与拓展</div>
       <div class="section">
-        <div class="item" @click="$router.push('/apply?type=api')"><span>API 开放平台</span><span class="val">自动化/开发者 &gt;</span></div>
+        <div class="item" @click="$router.push('/api-platform')"><span>API 开放平台</span><span class="val">自动化/开发者 &gt;</span></div>
       </div>
 
       <!-- 3. 通用 -->

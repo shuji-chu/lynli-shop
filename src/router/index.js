@@ -17,6 +17,7 @@ const routes = [
   { path: '/profile', component: () => import('@/views/ProfileView.vue') },
   { path: '/pay-settings', component: () => import('@/views/PaySettingsView.vue') },
   { path: '/language', component: () => import('@/views/LanguageView.vue') },
+  { path: '/api-platform', component: () => import('@/views/ApiPlatformView.vue') },
   { path: '/apply', component: () => import('@/views/ApplyView.vue') },
   { path: '/help', component: () => import('@/views/HelpView.vue') },
   { path: '/about', component: () => import('@/views/AboutView.vue') },

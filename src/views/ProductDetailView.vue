@@ -45,10 +45,9 @@
       </p>
 
       <div class="price-row">
-        <span class="price">{{ formatPrice(product.price) }}</span>
-        <span v-if="product.origin_price" class="origin">{{
-          formatPrice(product.origin_price)
-        }}</span>
+        <span class="price">{{ formatPrice(markupPrice(product.price)) }}</span>
+        <span class="origin">{{ formatPrice(product.price) }}</span>
+        <span class="markup-tag">含税上浮</span>
       </div>
 
       <div class="qty-row">
@@ -72,9 +71,16 @@
     </div>
   </div>
 
-  <div class="container empty" v-else>
+  <div class="container empty" v-else-if="!failed">
     <p>商品不存在或已下架</p>
     <router-link to="/" class="btn-ghost">返回首页</router-link>
+  </div>
+
+  <div class="container state-box" v-else>
+    <p class="state-icon">🛰️</p>
+    <p class="state-title">商品加载失败</p>
+    <p class="state-desc">可能是网络波动或接口跨域被拦截，请重试。</p>
+    <button class="btn-gold" @click="load">重新加载</button>
   </div>
 </template>
 
@@ -85,11 +91,13 @@ import { getProductDetail, getProducts } from '@/api/product'
 import { addToCart } from '@/store/cart'
 import { Toast } from '@/utils/toast'
 import { formatPrice } from '@/utils/format'
+import { markupPrice } from '@/utils/price'
 
 const route = useRoute()
 const router = useRouter()
 const product = ref(null)
 const loading = ref(true)
+const failed = ref(false)
 const qty = ref(1)
 const current = ref(0)
 const imgLoaded = ref(false)
@@ -140,6 +148,7 @@ async function load() {
     }
   } catch {
     product.value = null
+    failed.value = true
   } finally {
     loading.value = false
     current.value = 0
@@ -163,7 +172,7 @@ onMounted(load)
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(47, 107, 224, 0.05);
 }
 .gallery .main-img img {
   width: 100%;
@@ -234,6 +243,15 @@ onMounted(load)
   color: var(--text-3);
   text-decoration: line-through;
 }
+.markup-tag {
+  align-self: center;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  color: var(--accent);
+  border: 1px solid var(--border-strong);
+  background: rgba(47, 107, 224, 0.08);
+}
 .qty-row {
   margin-top: 22px;
   display: flex;
@@ -256,10 +274,10 @@ onMounted(load)
   height: 40px;
   font-size: 20px;
   color: var(--text-1);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(47, 107, 224, 0.06);
 }
 .stepper button:active {
-  background: rgba(212, 175, 107, 0.16);
+  background: rgba(47, 107, 224, 0.12);
 }
 .stepper input {
   width: 56px;

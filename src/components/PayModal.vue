@@ -24,6 +24,14 @@
           <p class="hint">请向以上地址充值 <b>{{ formatPrice(amount) }}</b> 对应金额，到账后自动确认</p>
         </template>
 
+        <template v-else-if="pay && pay.method === 'wechat'">
+          <h3 class="mt">微信支付</h3>
+          <div class="coming">
+            <p class="coming-title">即将开通</p>
+            <p class="hint">微信支付通道正在接入中，当前可使用支付宝或 USDT 完成支付。</p>
+          </div>
+        </template>
+
         <p v-if="amount" class="amount">{{ formatPrice(amount) }}</p>
         <p v-if="countdown > 0" class="expire">支付凭证有效期 {{ countdown }}s</p>
       </div>
@@ -201,7 +209,7 @@ onBeforeUnmount(() => clearInterval(timer))
   padding: 7px 14px;
   border-radius: 10px;
   font-size: 13px;
-  color: #1a1206;
+  color: #fff;
   background: linear-gradient(135deg, var(--gold-bright), var(--gold));
   font-weight: 600;
 }
@@ -210,6 +218,15 @@ onBeforeUnmount(() => clearInterval(timer))
   font-weight: 700;
   color: var(--gold-bright);
   margin-top: 6px;
+}
+.coming {
+  padding: 18px 0 6px;
+}
+.coming-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 10px;
 }
 .expire {
   margin-top: 10px;

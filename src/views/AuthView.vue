@@ -1,11 +1,8 @@
 <template>
   <div class="container auth">
     <div class="card panel">
-      
       <h2 class="title gold-text">LYNLI 泠礼</h2>
-      <p class="sub">邮箱验证码登录 / 注册</p>
-
-      
+      <p class="sub">邮箱验证码快捷登录 / 注册</p>
 
       <form @submit.prevent="onSubmit" class="form">
         <input
@@ -22,7 +19,14 @@
             placeholder="邮箱验证码"
             inputmode="numeric"
           />
-          <button class="btn-primary" style="width:100%;border-radius:20px;padding:15px;font-size:16px;font-weight:bold;background:#3b82f6;color:#fff;border:none;margin-top:20px;">立即登录 / 注册</button>
+          <button type="button" class="btn-ghost sm" :disabled="sending || countdown > 0" @click="onSend">
+            {{ countdown > 0 ? countdown + 's' : '获取验证码' }}
+          </button>
+        </div>
+
+        <button type="submit" class="btn-gold" :disabled="submitting">
+          {{ submitting ? '处理中...' : '立即登录 / 注册' }}
+        </button>
       </form>
 
       <p class="tip">登录即表示同意《用户协议》与《隐私政策》</p>
@@ -39,7 +43,6 @@ import { Toast } from '@/utils/toast'
 
 const route = useRoute()
 const router = useRouter()
-const mode = ref('login')
 const form = reactive({ email: '', code: '' })
 const sending = ref(false)
 const submitting = ref(false)
@@ -68,7 +71,6 @@ async function onSend() {
     Toast.success('验证码已发送，请查收邮箱')
     startCountdown()
   } catch {
-    /* 拦截器已提示 */
   } finally {
     sending.value = false
   }
@@ -85,8 +87,15 @@ async function onSubmit() {
   }
   submitting.value = true
   try {
-    const api = mode.value === 'login' ? login : register
-    const res = await api({ email: form.email, code: form.code })
+    // 逻辑合并：先尝试登录，如果失败（未注册），则自动注册
+    let res
+    try {
+      res = await login({ email: form.email, code: form.code })
+    } catch (e) {
+      // 如果后端返回未注册，则去注册
+      res = await register({ email: form.email, code: form.code })
+    }
+    
     const token = res?.token || res?.access_token
     if (!token) {
       Toast.error('操作失败：未返回登录凭证')
@@ -94,11 +103,10 @@ async function onSubmit() {
     }
     const info = res?.user || res?.info || { email: form.email }
     setSession(token, info)
-    Toast.success('登录成功')
+    Toast.success('操作成功')
     const redirect = route.query.redirect || '/'
     router.replace(redirect)
   } catch {
-    /* 拦截器已提示 */
   } finally {
     submitting.value = false
   }
@@ -119,50 +127,22 @@ onBeforeUnmount(() => clearInterval(timer))
   padding: 32px 26px;
   text-align: center;
 }
-.back {
-  display: inline-block;
-  font-size: 13px;
-  color: var(--text-3);
-  margin-bottom: 14px;
-}
-.back:hover {
-  color: var(--gold);
-}
 .title {
   font-size: 30px;
   font-weight: 800;
   letter-spacing: 1px;
+  color: #3b82f6;
 }
 .sub {
   margin-top: 8px;
   font-size: 13px;
   color: var(--text-2);
 }
-.tabs {
-  display: flex;
-  gap: 8px;
-  margin: 24px 0 20px;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  padding: 4px;
-}
-.tabs button {
-  flex: 1;
-  padding: 10px;
-  border-radius: 9px;
-  font-size: 15px;
-  color: var(--text-2);
-  transition: all 0.2s;
-}
-.tabs button.active {
-  background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-  color: #fff;
-  font-weight: 600;
-}
 .form {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  margin-top: 24px;
 }
 .code-row {
   display: flex;
@@ -179,6 +159,10 @@ onBeforeUnmount(() => clearInterval(timer))
 .btn-gold {
   margin-top: 6px;
   padding: 14px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 12px;
+  border: none;
 }
 .tip {
   margin-top: 18px;

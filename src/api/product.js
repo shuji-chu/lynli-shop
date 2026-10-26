@@ -9,3 +9,8 @@ export function getProducts(params = {}) {
 export function getProductDetail(id) {
   return request.get('/api/v1/shop/product/detail', { params: { id } })
 }
+
+// 动态获取分类
+export function getCategories() {
+  return request.get('/api/v1/shop/categories')
+}

@@ -77,7 +77,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import ProductCard from '@/components/ProductCard.vue'
-import { getProducts } from '@/api/product'
+import { getProducts, getCategories } from '@/api/product'
 
 const products = ref([])
 const loading = ref(false)
@@ -91,15 +91,7 @@ const showHistory = ref(false)
 const historyList = ref(JSON.parse(localStorage.getItem('lynli_search_history') || '[]'))
 
 // 分类数据
-const categories = [
-  { name: '全部', color: '#3b82f6' },
-  { name: '情趣玩具', color: '#ec4899' },
-  { name: '情趣内衣', color: '#8b5cf6' },
-  { name: '情趣用品', color: '#f59e0b' },
-  { name: '情侣共震', color: '#10b981' },
-  { name: '趣味玩具', color: '#f43f5e' },
-  { name: '解压盲盒', color: '#06b6d4' }
-]
+const categories = ref([])
 
 // 执行搜索并保存历史
 function handleSearch() {
@@ -159,7 +151,19 @@ async function loadData() {
 
 function loadMore() { if (!hasMore.value) return; page.value++; loadData() }
 
-onMounted(loadData)
+onMounted(() => {
+  loadData()
+  loadCategories()
+})
+
+async function loadCategories() {
+  try {
+    const res = await getCategories()
+    categories.value = res.data || res || []
+  } catch (e) {
+    console.warn('获取分类失败', e)
+  }
+}
 </script>
 
 <style scoped>

@@ -121,7 +121,7 @@ onMounted(load)
 /* 留出顶部导航栏的高度 */
 .orders-page { 
   padding-top: 56px; 
-  padding-bottom: 140px; 
+   
   background: #f5f7fa; 
   min-height: 100vh; 
   box-sizing: border-box;

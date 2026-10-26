@@ -5,7 +5,6 @@
 
   <main class="page" :class="{ 'is-auth': $route.path === '/' }">
     <router-view v-slot="{ Component }">
-      <!-- 🚨 核心大招：开启缓存，把首页(HomeView)和订单页(OrdersView)保存起来 -->
       <keep-alive :include="['HomeView', 'OrdersView', 'CartView']">
         <component :is="Component" />
       </keep-alive>
@@ -27,12 +26,23 @@ import ChatWidget from '@/components/ChatWidget.vue'
 </script>
 
 <style>
-.page { padding-top: 64px; padding-bottom: 40px; min-height: 100vh; }
+/* 全局统一的页面容器，防止子页面打架 */
+.page { 
+  padding-top: 64px; /* 桌面端 */
+  padding-bottom: 40px; 
+  min-height: 100vh; 
+  box-sizing: border-box; 
+}
 .page.is-auth { padding-top: 0; padding-bottom: 0; }
+
 @media (max-width: 640px) {
-  .page { padding-top: 56px; padding-bottom: 78px; }
+  .page { 
+    padding-top: 56px; /* 手机端顶部固定高度 */
+    padding-bottom: 78px; /* 留出底部导航栏的空间 */
+  }
   .page.is-auth { padding-top: 0; padding-bottom: 0; }
 }
+
 .fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease, transform 0.25s ease; }
 .fade-enter-from { opacity: 0; transform: translateY(8px); }
 .fade-leave-to { opacity: 0; }

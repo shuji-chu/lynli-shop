@@ -180,7 +180,7 @@ function handleLogout() {
 </script>
 
 <style scoped>
-.security-page { min-height: 100vh; background: #f5f7fa; padding-top: 60px; }
+.security-page { min-height: 100vh; background: #f5f7fa;  }
 .header { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 100; border-bottom: 1px solid #eee; }
 .header h2 { font-size: 18px; margin: 0; color: #1e293b; }
 .back-btn { background: none; border: none; cursor: pointer; color: #1e293b; padding: 0; display: flex; align-items: center; }

@@ -35,7 +35,7 @@ const tradeNo = route.query.trade_no || ''
 .success {
   display: flex;
   justify-content: center;
-  padding-top: 60px;
+  
 }
 .card {
   width: 100%;

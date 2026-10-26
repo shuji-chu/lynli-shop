@@ -1,4 +1,5 @@
 import { reactive, computed, watch } from 'vue'
+import { markupTotal } from '@/utils/price'
 
 const STORAGE_KEY = 'lynli_cart'
 
@@ -75,9 +76,8 @@ export const selectedItems = computed(() =>
 export const selectedCount = computed(() =>
   selectedItems.value.reduce((s, i) => s + i.qty, 0)
 )
-export const selectedTotal = computed(() =>
-  selectedItems.value.reduce((s, i) => s + i.qty * i.price, 0)
-)
+// 选中项总价（已上浮 35%，经价格中枢统一计算）
+export const selectedTotal = computed(() => markupTotal(selectedItems.value))
 export const totalCount = computed(() =>
   cart.items.reduce((s, i) => s + i.qty, 0)
 )

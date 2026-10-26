@@ -56,6 +56,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'HomeView' });
 import { ref, computed, onMounted } from 'vue'
 import { getProducts } from '@/api/product'
 import ProductCard from '@/components/ProductCard.vue'

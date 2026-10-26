@@ -83,6 +83,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'CartView' });
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { cart, updateQty, removeFromCart, setSelected, setSelectAll, allSelected, selectedTotal, selectedCount } from '@/store/cart'

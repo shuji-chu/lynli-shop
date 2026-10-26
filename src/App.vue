@@ -5,8 +5,8 @@
 
   <main class="page" :class="{ 'is-auth': $route.path === '/' }">
     <router-view v-slot="{ Component }">
-      <!-- 🔥 核心大招：使用 keep-alive 缓存首页和分类页，防止来回切换重新加载 -->
-      <keep-alive :include="['HomeView']">
+      <!-- 🚨 核心大招：开启缓存，把首页(HomeView)和订单页(OrdersView)保存起来 -->
+      <keep-alive :include="['HomeView', 'OrdersView', 'CartView']">
         <component :is="Component" />
       </keep-alive>
     </router-view>
@@ -20,7 +20,6 @@
 </template>
 
 <script setup>
-import DynamicBackground from '@/components/DynamicBackground.vue'
 import NavBar from '@/components/NavBar.vue'
 import BottomNav from '@/components/BottomNav.vue'
 import Toast from '@/components/Toast.vue'

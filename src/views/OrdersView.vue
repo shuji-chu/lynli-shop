@@ -47,6 +47,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'OrdersView' });
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMyOrders } from '@/api/order'

@@ -11,9 +11,16 @@
       <div v-for="n in 3" :key="n" class="skeleton row-skel"></div>
     </div>
 
-    <div v-else-if="!list.length" class="empty">
+    <div v-else-if="!list.length && !failed" class="empty">
       <p>暂无订单</p>
       <router-link to="/" class="btn-gold">去逛逛</router-link>
+    </div>
+
+    <div v-else-if="failed" class="state-box">
+      <p class="state-icon">🛰️</p>
+      <p class="state-title">订单加载失败</p>
+      <p class="state-desc">可能是网络波动或接口跨域被拦截，请重试。</p>
+      <button class="btn-gold" @click="load">重新加载</button>
     </div>
 
     <ul v-else class="list">
@@ -48,6 +55,7 @@ import { formatPrice, formatTime } from '@/utils/format'
 
 const list = ref([])
 const loading = ref(true)
+const failed = ref(false)
 
 const STATUS_MAP = {
   pending: ['待支付', 'pending'],
@@ -81,20 +89,25 @@ function onErr(e) {
   e.target.style.visibility = 'hidden'
 }
 
-onMounted(async () => {
+async function load() {
   if (!isLoggedIn.value) {
     loading.value = false
     return
   }
+  loading.value = true
+  failed.value = false
   try {
     const res = await getMyOrders()
     list.value = normalize(res)
   } catch {
     list.value = []
+    failed.value = true
   } finally {
     loading.value = false
   }
-})
+}
+
+onMounted(load)
 </script>
 
 <style scoped>

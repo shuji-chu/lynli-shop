@@ -2,7 +2,7 @@
   <header class="navbar">
     <div class="container bar">
       <router-link to="/" class="brand">
-        <img src="/logo.png" alt="LYNLI" class="logo" />
+        <img src="/logo.png" alt="LYNLI" class="nav-logo" style="height: 32px; width: auto;">
         <span class="brand-text">LYNLI<i>微澜</i></span>
       </router-link>
 

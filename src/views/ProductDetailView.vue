@@ -50,6 +50,9 @@
             <div class="r-user">
               <span class="id-tag">ID:{{ r.short_id }}</span>
               <span class="ip-tag">{{ r.city || '未知' }}</span>
+              <span v-for="(tag, idx) in (r.tags || ['回头客', 'VIP'])" :key="idx" class="custom-tag">
+                {{ tag }}
+              </span>
             </div>
             <span class="r-stars">⭐⭐⭐⭐⭐</span>
           </div>
@@ -228,6 +231,10 @@ const handleBuyNow = () => { addToCart(product.value); router.push('/cart'); }
 .id-tag { font-size: 12px; font-weight: bold; color: #1e293b; }
 .ip-tag { font-size: 10px; background: #f1f5f9; color: #64748b; padding: 2px 6px; border-radius: 4px; }
 .r-stars { font-size: 10px; }
+
+.r-user { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.custom-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #fffbeb; color: #f59e0b; border: 1px solid #fde68a; }
+
 .r-content { font-size: 14px; color: #334155; margin: 0; line-height: 1.5; }
 
 /* 底部操作栏 */

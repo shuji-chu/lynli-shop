@@ -3,61 +3,83 @@
     <canvas id="canvas" resize></canvas>
     
     <div class="login-card">
-      <h2 style="text-align: center; font-size: 26px; font-weight: 900; color: #1e3a8a; margin-bottom: 20px;">
+      <h2 style="text-align: center; font-size: 26px; font-weight: 900; color: #1e3a8a; margin-bottom: 30px;">
         LYNLI <span style="color: #3b82f6; font-size: 20px;">泠礼</span>
       </h2>
       
-      <div v-if="mode !== 'forget'" class="tab-header">
-        <div @click="mode='login'" :class="['tab-item', mode === 'login' ? 'active' : '']">登录</div>
-        <div @click="mode='register'" :class="['tab-item', mode === 'register' ? 'active' : '']">注册</div>
-      </div>
-      
-      <h3 v-else style="text-align: center; color: #3b82f6; margin-bottom: 20px;">重置密码</h3>
-
-      <form @submit.prevent="submit" class="form-body">
+      <!-- ================= 登录模式 ================= -->
+      <form v-if="mode === 'login'" @submit.prevent="submit" class="form-body">
         <input v-model="form.email" type="email" placeholder="请输入邮箱" required class="input-field" />
         
-        <div v-if="mode !== 'login'" class="code-group">
+        <input v-model="form.password" type="password" placeholder="请输入密码" required class="input-field" />
+
+        <div class="code-group">
+          <input v-model="form.captcha" placeholder="4位图形码" maxlength="4" required class="input-field code-input" />
+          <div @click="generateCaptcha" class="captcha-box">{{ captchaText }}</div>
+        </div>
+
+        <div class="remember-box">
+          <input type="checkbox" v-model="rememberMe" id="remember" />
+          <label for="remember">记住密码</label>
+        </div>
+
+        <button type="submit" class="submit-btn">立即登录</button>
+
+        <div class="bottom-links">
+          <span @click="mode = 'forget'" class="link-gray">忘记密码？</span>
+          <span @click="mode = 'register'" class="link-blue">没有账号？立即注册</span>
+        </div>
+      </form>
+
+      <!-- ================= 注册模式 ================= -->
+      <form v-else-if="mode === 'register'" @submit.prevent="submit" class="form-body">
+        <input v-model="form.email" type="email" placeholder="请输入邮箱" required class="input-field" />
+        
+        <div class="code-group">
           <input v-model="form.emailCode" placeholder="6位邮箱验证码" maxlength="6" required class="input-field code-input" />
           <button type="button" @click="sendEmailCode" :disabled="counting" class="code-btn">
             {{ counting ? countdown + 's' : '获取验证码' }}
           </button>
         </div>
 
-        <input v-model="form.password" type="password" :placeholder="mode === 'forget' ? '请输入新密码' : '密码'" required class="input-field" />
+        <input v-model="form.nickname" placeholder="请输入昵称" required class="input-field" />
+        <input v-model="form.password" type="password" placeholder="设置密码" required class="input-field" />
+        <input v-model="form.rePassword" type="password" placeholder="确认密码" required class="input-field" />
 
-        <input v-if="mode === 'register'" v-model="form.rePassword" type="password" placeholder="确认密码" required class="input-field" />
-
-        <div v-if="mode === 'login'" class="code-group">
-          <input v-model="form.captcha" placeholder="4位图形码" maxlength="4" required class="input-field code-input" />
-          <div @click="generateCaptcha" class="captcha-box">
-            {{ captchaText }}
-          </div>
+        <div class="remember-box" style="margin-bottom: 5px;">
+          <input type="checkbox" v-model="agreePrivacy" id="agree" />
+          <label for="agree">
+            我已阅读并同意 <a @click.prevent="openModal('privacy')" href="#">《隐私协议》</a> 和 <a @click.prevent="openModal('terms')" href="#">《服务条款》</a>
+          </label>
         </div>
 
-        <div v-if="mode === 'login'" class="remember-box">
-          <input type="checkbox" v-model="rememberMe" id="remember" />
-          <label for="remember">记住密码</label>
-        </div>
+        <button type="submit" class="submit-btn">注册并登录</button>
 
-        <button type="submit" class="submit-btn">
-          {{ mode === 'login' ? '立即登录' : mode === 'register' ? '注册并登录' : '重置密码' }}
-        </button>
+        <div class="bottom-links" style="justify-content: flex-end;">
+          <span @click="mode = 'login'" class="link-blue">已有账号？去登录</span>
+        </div>
       </form>
 
-      <div class="bottom-links">
-        <span v-if="mode === 'login'" @click="mode='forget'" class="forget-link">忘记密码？</span>
-        <span v-if="mode === 'forget'" @click="mode='login'" class="return-link">返回登录</span>
+      <!-- ================= 找回密码模式 ================= -->
+      <form v-else-if="mode === 'forget'" @submit.prevent="submit" class="form-body">
+        <input v-model="form.email" type="email" placeholder="请输入注册邮箱" required class="input-field" />
         
-        <span v-if="mode === 'login'" @click="mode='register'" class="register-link">还没有账号？立即注册</span>
-        <span v-if="mode === 'register'" @click="mode='login'" class="login-link">已有账号？去登录</span>
-      </div>
-    </div>
+        <div class="code-group">
+          <input v-model="form.emailCode" placeholder="6位邮箱验证码" maxlength="6" required class="input-field code-input" />
+          <button type="button" @click="sendEmailCode" :disabled="counting" class="code-btn">
+            {{ counting ? countdown + 's' : '获取验证码' }}
+          </button>
+        </div>
 
-    <div class="privacy-footer">
-      登录即代表同意 
-      <a @click.prevent="openModal('privacy')" href="#">《用户隐私协议》</a> 和 
-      <a @click.prevent="openModal('terms')" href="#">《服务条款》</a>
+        <input v-model="form.password" type="password" placeholder="请输入新密码" required class="input-field" />
+
+        <button type="submit" class="submit-btn">重置密码</button>
+
+        <div class="bottom-links" style="justify-content: flex-end;">
+          <span @click="mode = 'login'" class="link-blue">返回登录</span>
+        </div>
+      </form>
+
     </div>
 
     <PrivacyModal :show="showModal" :type="modalType" @close="showModal = false" />
@@ -71,9 +93,18 @@ import PrivacyModal from '@/components/PrivacyModal.vue'
 import paper from 'paper'
 
 const router = useRouter()
-const mode = ref('login')
-const form = reactive({ email: '', password: '', rePassword: '', emailCode: '', captcha: '' })
+const mode = ref('login') // login | register | forget
+
+const form = reactive({ 
+  email: '', 
+  password: '', 
+  rePassword: '', 
+  nickname: '',
+  emailCode: '', 
+  captcha: '' 
+})
 const rememberMe = ref(false)
+const agreePrivacy = ref(false)
 
 const API = 'https://api.lynli.me'
 const counting = ref(false)
@@ -100,11 +131,13 @@ let paperScope = null
 onMounted(() => {
   generateCaptcha()
   
+  // 自动登录逻辑
   const token = localStorage.getItem('token')
   if (token && token !== 'undefined' && token !== 'null') {
     router.replace('/shop')
   }
   
+  // 记住密码回填
   const savedEmail = localStorage.getItem('saved_email')
   const savedPwd = localStorage.getItem('saved_pwd')
   if (savedEmail && savedPwd) {
@@ -113,6 +146,7 @@ onMounted(() => {
     rememberMe.value = true
   }
 
+  // Canvas 动画
   const canvas = document.getElementById('canvas')
   paperScope = new paper.PaperScope()
   paperScope.setup(canvas)
@@ -121,26 +155,19 @@ onMounted(() => {
   const positionArray = []
   
   const getCanvasBounds = () => {
-    const canvasWidth = paperScope.view.size.width
-    const canvasHeight = paperScope.view.size.height
-    const canvasMiddleX = canvasWidth / 2
-    const canvasMiddleY = canvasHeight / 2
-    
-    const position1 = { x: (canvasMiddleX / 2) + 100, y: 100 }
-    const position2 = { x: 200, y: canvasMiddleY }
-    const position3 = { x: (canvasMiddleX - 50) + (canvasMiddleX / 2), y: 150 }
-    const position4 = { x: 0, y: canvasMiddleY + 100 }
-    const position5 = { x: canvasWidth - 130, y: canvasHeight - 75 }
-    const position6 = { x: canvasMiddleX + 80, y: canvasHeight - 50 }
-    const position7 = { x: canvasWidth + 60, y: canvasMiddleY - 50 }
-    const position8 = { x: canvasMiddleX + 100, y: canvasMiddleY + 100 }
-    
-    positionArray.push(position3, position2, position5, position4, position1, position6, position7, position8)
+    const w = paperScope.view.size.width
+    const h = paperScope.view.size.height
+    positionArray.push(
+      { x: w * 0.7, y: 150 }, { x: 200, y: h / 2 }, 
+      { x: w * 0.8, y: 150 }, { x: 0, y: h / 2 + 100 },
+      { x: w - 130, y: h - 75 }, { x: w / 2 + 80, y: h - 50 },
+      { x: w + 60, y: h / 2 - 50 }, { x: w / 2 + 100, y: h / 2 + 100 }
+    )
   }
   
-  const initializeShapes = () => {
+  const initShapes = () => {
     getCanvasBounds()
-    const shapePathData = [
+    const pathData = [
       'M231,352l445-156L600,0L452,54L331,3L0,48L231,352',
       'M0,0l64,219L29,343l535,30L478,37l-133,4L0,0z',
       'M0,65l16,138l96,107l270-2L470,0L337,4L0,65z',
@@ -150,36 +177,27 @@ onMounted(() => {
       'M 50 100 L 300 150 L 550 50 L 750 300 L 500 250 L 300 450 L 50 100',
       'M 700 350 L 500 350 L 700 500 L 400 400 L 200 450 L 250 350 L 100 300 L 150 50 L 350 100 L 250 150 L 450 150 L 400 50 L 550 150 L 350 250 L 650 150 L 650 50 L 700 150 L 600 250 L 750 250 L 650 300 L 700 350'
     ]
-    
-    for (let i = 0; i < shapePathData.length; i++) {
-      const headerShape = new paper.Path({
-        strokeColor: 'rgba(59, 130, 246, 0.3)',
-        strokeWidth: 2,
-        parent: shapeGroup
-      })
-      headerShape.pathData = shapePathData[i]
-      headerShape.fullySelected = true
-    }
+    pathData.forEach(path => {
+      const shape = new paper.Path({ strokeColor: 'rgba(59, 130, 246, 0.3)', strokeWidth: 2, parent: shapeGroup })
+      shape.pathData = path
+      shape.fullySelected = true
+    })
   }
   
-  initializeShapes()
+  initShapes()
   
-  paperScope.view.onFrame = (event) => {
-    for (let i = 0; i < shapeGroup.children.length; i++) {
-      const item = shapeGroup.children[i]
-      const position = positionArray[i]
-      if (position) {
-        item.position.x += (position.x - item.position.x) * 0.05
-        item.position.y += (position.y - item.position.y) * 0.05
+  paperScope.view.onFrame = () => {
+    shapeGroup.children.forEach((item, i) => {
+      if (positionArray[i]) {
+        item.position.x += (positionArray[i].x - item.position.x) * 0.05
+        item.position.y += (positionArray[i].y - item.position.y) * 0.05
       }
-    }
+    })
   }
 })
 
 onBeforeUnmount(() => {
-  if (paperScope) {
-    paperScope.remove()
-  }
+  if (paperScope) paperScope.remove()
 })
 
 const sendEmailCode = async () => {
@@ -210,11 +228,15 @@ const sendEmailCode = async () => {
 }
 
 const submit = async () => {
+  // 登录校验
   if (mode.value === 'login' && form.captcha.toUpperCase() !== captchaText.value) {
     alert('图形验证码错误'); generateCaptcha(); form.captcha = ''; return
   }
-  if (mode.value === 'register' && form.password !== form.rePassword) {
-    return alert('两次输入的密码不一致')
+  
+  // 注册校验
+  if (mode.value === 'register') {
+    if (form.password !== form.rePassword) return alert('两次输入的密码不一致')
+    if (!agreePrivacy.value) return alert('请先阅读并勾选用户隐私协议')
   }
 
   try {
@@ -226,7 +248,7 @@ const submit = async () => {
       body = { email: form.email, password: form.password }
     } else if (mode.value === 'register') {
       url = API + '/api/v1/auth/register'
-      body = { email: form.email, password: form.password, code: form.emailCode }
+      body = { email: form.email, password: form.password, nickname: form.nickname, code: form.emailCode }
     } else if (mode.value === 'forget') {
       url = API + '/api/v1/auth/reset_password'
       body = { email: form.email, password: form.password, code: form.emailCode }
@@ -248,6 +270,7 @@ const submit = async () => {
         return
       }
       
+      // 处理记住密码
       if (mode.value === 'login') {
         if (rememberMe.value) {
           localStorage.setItem('saved_email', form.email)
@@ -263,9 +286,7 @@ const submit = async () => {
       
       if (token) { 
         localStorage.setItem('token', token)
-        if (userInfo) {
-          localStorage.setItem('userInfo', JSON.stringify(userInfo))
-        }
+        if (userInfo) localStorage.setItem('userInfo', JSON.stringify(userInfo))
         router.push('/shop') 
       } else { 
         alert('接口未返回 Token') 
@@ -305,33 +326,12 @@ const submit = async () => {
   max-width: 380px;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
-  padding: 40px 30px 30px;
+  padding: 40px 30px;
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(30, 58, 138, 0.1);
   z-index: 10;
   border: 1px solid rgba(255, 255, 255, 0.6);
   position: relative;
-}
-
-.tab-header {
-  display: flex;
-  border-bottom: 1px solid #f1f5f9;
-  margin-bottom: 25px;
-}
-
-.tab-item {
-  flex: 1;
-  text-align: center;
-  padding-bottom: 12px;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.tab-item.active {
-  color: #3b82f6;
-  border-bottom: 2px solid #3b82f6;
-  font-weight: bold;
 }
 
 .form-body {
@@ -348,6 +348,7 @@ const submit = async () => {
   outline: none;
   background: #f8fafc;
   box-sizing: border-box;
+  font-size: 15px;
 }
 
 .code-group {
@@ -367,7 +368,7 @@ const submit = async () => {
   border-radius: 10px;
   padding: 0 15px;
   font-size: 14px;
-  height: 46px;
+  height: 48px;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -383,7 +384,7 @@ const submit = async () => {
   border-radius: 10px;
   font-family: monospace;
   font-size: 18px;
-  height: 46px;
+  height: 48px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -398,6 +399,11 @@ const submit = async () => {
   color: #64748b;
 }
 
+.remember-box a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
 .submit-btn {
   background: #3b82f6;
   color: #fff;
@@ -409,43 +415,24 @@ const submit = async () => {
   margin-top: 10px;
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-  transition: opacity 0.2s;
-}
-
-.submit-btn:hover {
-  opacity: 0.9;
 }
 
 .bottom-links {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 10px;
   font-size: 14px;
 }
 
-.forget-link, .return-link {
+.link-gray {
   color: #64748b;
   cursor: pointer;
 }
 
-.register-link, .login-link {
+.link-blue {
   color: #3b82f6;
   font-weight: bold;
   cursor: pointer;
-}
-
-.privacy-footer {
-  margin-top: 30px;
-  font-size: 12px;
-  color: #94a3b8;
-  text-align: center;
-  z-index: 10;
-  position: relative;
-}
-
-.privacy-footer a {
-  color: #3b82f6;
-  text-decoration: none;
 }
 </style>

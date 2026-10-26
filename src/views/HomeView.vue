@@ -23,8 +23,18 @@
     <div v-if="loading" class="grid">
       <SkeletonCard v-for="n in 8" :key="n" />
     </div>
-    <div v-else-if="!filtered.length" class="empty">
-      <p>暂无商品，请稍后再来～</p>
+    <div v-else-if="loadError" class="state-box">
+      <p class="state-icon">🛰️</p>
+      <p class="state-title">商品加载失败</p>
+      <p class="state-desc">
+        可能是网络波动或接口跨域被拦截，请检查网络后重试。
+      </p>
+      <button class="btn-gold" @click="load">重新加载</button>
+    </div>
+    <div v-else-if="!filtered.length" class="state-box">
+      <p class="state-icon">🛍️</p>
+      <p class="state-title">暂无商品</p>
+      <p class="state-desc">管理端尚未铺货，请稍后再来～</p>
     </div>
     <div v-else class="grid">
       <ProductCard v-for="p in filtered" :key="p.id" :product="p" />
@@ -40,6 +50,7 @@ import { getProducts } from '@/api/product'
 
 const products = ref([])
 const loading = ref(true)
+const loadError = ref(false)
 const activeCat = ref('')
 const categories = ref([])
 
@@ -67,18 +78,24 @@ function buildCategories(list) {
   categories.value = [...set]
 }
 
-onMounted(async () => {
+async function load() {
+  loading.value = true
+  loadError.value = false
   try {
     const res = await getProducts()
     const list = normalize(res)
     products.value = list
     buildCategories(list)
   } catch {
+    // 网络 / 跨域 / 服务端异常：展示可重试的错误态，杜绝白屏卡死
     products.value = []
+    loadError.value = true
   } finally {
     loading.value = false
   }
-})
+}
+
+onMounted(load)
 </script>
 
 <style scoped>
@@ -117,7 +134,7 @@ onMounted(async () => {
   transition: all 0.2s;
 }
 .cat.active {
-  color: #1a1206;
+  color: #fff;
   background: linear-gradient(135deg, var(--gold-bright), var(--gold));
   border-color: var(--gold);
   font-weight: 600;

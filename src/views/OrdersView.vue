@@ -1,6 +1,6 @@
 <template>
   <div class="orders-page">
-    <!-- 1. 顶部个人信息卡片 (紧凑版) -->
+    <!-- 1. 顶部个人信息卡片 (改为带边距的悬浮卡片) -->
     <div class="profile-header">
       <div class="p-top">
         <img :src="myAvatar" class="p-avatar" />
@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <!-- 2. 我的订单模块 (紧凑版) -->
+    <!-- 2. 我的订单模块 -->
     <div class="section">
       <div class="section-header">
         <h3>我的订单</h3>
@@ -82,6 +82,9 @@
         <div class="m-right"><span class="arrow">&gt;</span></div>
       </div>
     </div>
+    
+    <!-- 留白占位，防止底部内容被导航栏和悬浮窗遮挡 -->
+    <div class="bottom-spacer"></div>
   </div>
 </template>
 
@@ -117,17 +120,17 @@ onMounted(load)
 </script>
 
 <style scoped>
-/* 🚨 彻底去掉双重 padding，统一由 App.vue 接管 */
-.orders-page { background: #f5f7fa; min-height: 100%; padding: 0; }
+/* 统一背景色，消除底部突兀的白边 */
+.orders-page { background: #f5f7fa; min-height: 100%; }
 
-/* 顶部通栏渐变卡片 (降低了高度) */
+/* 🚨 核心协调：顶部卡片也变成带边距的圆角卡片，与下面完美对齐 */
 .profile-header { 
   background: linear-gradient(135deg, #3b82f6, #1e3a8a); 
-  padding: 20px; 
+  padding: 24px 20px 20px; 
   color: #fff; 
-  border-bottom-left-radius: 20px; 
-  border-bottom-right-radius: 20px; 
-  margin-bottom: 12px; 
+  border-radius: 16px; 
+  margin: 16px; 
+  box-shadow: 0 6px 16px rgba(59,130,246,0.15); 
 }
 .p-top { display: flex; align-items: center; gap: 16px; position: relative; margin-bottom: 20px; }
 .p-avatar { width: 64px; height: 64px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.9); object-fit: cover; background: #fff; }
@@ -144,21 +147,24 @@ onMounted(load)
 .p-links span:first-child { text-align: left; }
 .p-links span:last-child { text-align: right; }
 
-/* 通用卡片 (大幅缩小间距) */
-.section { background: #fff; margin: 0 12px 12px; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+/* 卡片边距统一为 16px */
+.section { background: #fff; margin: 0 16px 16px; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .section-header h3 { margin: 0; font-size: 15px; color: #1e293b; font-weight: bold; }
 .all-orders { font-size: 12px; color: #94a3b8; cursor: pointer; }
 
 .order-nav { display: flex; justify-content: space-between; }
-.nav-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; color: #475569; font-size: 12px; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; color: #475569; font-size: 12px; }
 .nav-item svg { width: 24px; height: 24px; stroke-width: 1.5; }
 
-/* 菜单列表 (行高缩紧) */
-.menu-list { padding: 0 16px; }
-.menu-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+/* 菜单列表 */
+.menu-list { padding: 0 20px; }
+.menu-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
 .menu-item:last-child { border-bottom: none; padding-bottom: 0; }
-.m-left { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #334155; font-weight: 500; }
+.m-left { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #334155; font-weight: 500; }
 .m-left svg { width: 20px; height: 20px; }
 .arrow { color: #cbd5e1; font-size: 13px; }
+
+/* 🚨 增加底部占位，把帮助与反馈彻底顶到 AI 气泡上面 */
+.bottom-spacer { height: 80px; }
 </style>

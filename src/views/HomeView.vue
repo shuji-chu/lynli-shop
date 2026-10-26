@@ -32,7 +32,7 @@
       <button class="btn-gold" @click="load">重新加载</button>
     </div>
     <div v-else-if="!filtered.length" class="state-box">
-      <p class="state-icon">🛍️</p>
+      <p class="state-icon"></p>
       <p class="state-title">暂无商品</p>
       <p class="state-desc">管理端尚未铺货，请稍后再来～</p>
     </div>

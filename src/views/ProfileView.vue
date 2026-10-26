@@ -15,7 +15,13 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Toast } from '@/utils/toast'
-const myInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+
+// 安全读取，防止报错导致白屏
+let myInfo = {}
+try {
+  myInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+} catch (e) {}
+
 const nickname = ref(myInfo.nickname || '')
 const myEmail = computed(() => myInfo.email || '未绑定')
 const myAvatar = computed(() => myInfo.avatar || 'https://api.dicebear.com/7.x/initials/svg?seed=lynli&backgroundColor=3b82f6&textColor=ffffff')

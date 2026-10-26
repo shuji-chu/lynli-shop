@@ -126,7 +126,7 @@ onMounted(load)
 
 <style scoped>
 /* 页面底层底色 */
-.orders-page { background: #f5f7fa; min-height: 100vh; padding-bottom: 40px; }
+.orders-page { padding-top: 64px; background: #f5f7fa; min-height: 100vh; padding-bottom: 40px; }
 
 /* 顶部通栏渐变卡片 */
 .profile-header { 

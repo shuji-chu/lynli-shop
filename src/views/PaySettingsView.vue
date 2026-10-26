@@ -64,7 +64,7 @@
 </template>
 
 <style scoped>
-.page-wrap { min-height: 100vh; background: #f5f7fa; }
+.page-wrap { padding-top: 64px; min-height: 100vh; background: #f5f7fa; }
 .header { height: 56px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
 .header button { background: none; border: none; font-size: 24px; color: #1e293b; }
 .header h2 { font-size: 18px; margin: 0; color: #1e293b; }

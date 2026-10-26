@@ -3,6 +3,7 @@
     <NavBar />
   </template>
 
+  <!-- 彻底删除顶部的 padding-top -->
   <main class="page" :class="{ 'is-auth': $route.path === '/' }">
     <router-view v-slot="{ Component }">
       <keep-alive :include="['HomeView', 'OrdersView', 'CartView']">
@@ -11,7 +12,7 @@
     </router-view>
   </main>
 
-  <template v-if="$route.path !== '/'">
+  <template v-if="$router.path !== '/'">
     <BottomNav />
     <Toast />
     <ChatWidget />
@@ -26,24 +27,17 @@ import ChatWidget from '@/components/ChatWidget.vue'
 </script>
 
 <style>
-/* 全局统一的页面容器，防止子页面打架 */
 .page { 
-  padding-top: 64px; /* 桌面端 */
-  padding-bottom: 40px; 
   min-height: 100vh; 
   box-sizing: border-box; 
+  /* 移除所有 padding-top */
+  padding-bottom: 70px;
 }
-.page.is-auth { padding-top: 0; padding-bottom: 0; }
+.page.is-auth { padding-bottom: 0; }
 
 @media (max-width: 640px) {
-  .page { 
-    padding-top: 56px; /* 手机端顶部固定高度 */
-    padding-bottom: 78px; /* 留出底部导航栏的空间 */
-  }
-  .page.is-auth { padding-top: 0; padding-bottom: 0; }
+  .page { padding-bottom: 80px; }
+  .page.is-auth { padding-bottom: 0; }
 }
-
-.fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease, transform 0.25s ease; }
-.fade-enter-from { opacity: 0; transform: translateY(8px); }
-.fade-leave-to { opacity: 0; }
+.fade-enter-active, .fade-leave-to { transition: opacity 0.25s ease; }
 </style>

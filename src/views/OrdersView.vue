@@ -1,18 +1,22 @@
 <template>
   <div class="container orders-page">
-    <div class="profile-card">
+    <!-- 顶部：通栏渐变背景卡片 (消除左右留白) -->
+    <div class="profile-header">
       <div class="p-top">
         <img :src="myAvatar" class="p-avatar" />
         <div class="p-info">
-          <h3 class="p-name">{{ myNickname }}</h3>
-          <!-- 🚨 核心修改：ID 直接怼在名字下面 -->
+          <div class="name-row">
+            <h3 class="p-name">{{ myNickname }}</h3>
+            <span class="p-role" v-if="userInfo.role === 'super' || userInfo.role === 'admin'">管理员</span>
+          </div>
           <p class="p-id">专属ID: {{ userInfo.short_id || '10001' }}</p>
-          <p class="p-role" v-if="userInfo.role === 'super' || userInfo.role === 'admin'">尊贵的管理员</p>
         </div>
         <div class="settings-icon" @click="$router.push('/settings')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </div>
       </div>
+      
+      <!-- 快捷入口 (增加点击区域，减少视觉破碎) -->
       <div class="p-links">
         <span @click="$router.push('/profile')">个人信息</span>
         <span @click="$router.push('/security')">账号与安全</span>
@@ -20,6 +24,7 @@
       </div>
     </div>
 
+    <!-- 中间：订单卡片 (去掉多余边距，贴近背景) -->
     <div class="section">
       <div class="section-header">
         <h3>我的订单</h3>
@@ -47,7 +52,6 @@
 </template>
 
 <script setup>
-defineOptions({ name: 'OrdersView' });
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMyOrders } from '@/api/order'
@@ -79,24 +83,44 @@ onMounted(load)
 </script>
 
 <style scoped>
-.orders-page { padding-top: 76px; padding-bottom: 40px; background: #f5f7fa; min-height: 100vh; }
-.profile-card { position: relative; background: linear-gradient(135deg, #3b82f6, #1e3a8a); border-radius: 20px; padding: 24px; color: #fff; box-shadow: 0 10px 20px rgba(59,130,246,0.2); margin-bottom: 16px; }
-.p-top { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-.p-avatar { width: 68px; height: 68px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); object-fit: cover; }
-.p-info { display: flex; flex-direction: column; gap: 4px; }
-.p-name { font-size: 20px; font-weight: bold; margin: 0; }
-.p-id { font-size: 12px; color: rgba(255,255,255,0.8); margin: 0; font-family: monospace; letter-spacing: 1px; }
-.p-role { font-size: 12px; background: rgba(255,255,255,0.2); display: inline-block; padding: 3px 10px; border-radius: 12px; margin: 0; width: fit-content; }
-.settings-icon { position: absolute; top: 24px; right: 20px; cursor: pointer; opacity: 0.8; }
-.settings-icon svg { width: 20px; height: 20px; }
-.p-links { display: flex; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.9); border-top: 1px solid rgba(255,255,255,0.2); padding-top: 16px; }
-.p-links span { cursor: pointer; }
-.section { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
+/* 页面底层底色 */
+.orders-page { background: #f5f7fa; min-height: 100vh; padding-bottom: 40px; }
+
+/* 🚨 彻底拉满顶部卡片，贴合顶部导航，不留缝隙 */
+.profile-header { 
+  background: linear-gradient(135deg, #3b82f6, #1e3a8a); 
+  padding: 32px 20px 24px; 
+  color: #fff; 
+  border-bottom-left-radius: 24px; 
+  border-bottom-right-radius: 24px; 
+  margin-bottom: 16px; 
+  box-shadow: 0 8px 20px rgba(59,130,246,0.2); 
+}
+
+.p-top { display: flex; align-items: center; gap: 16px; position: relative; margin-bottom: 24px; }
+.p-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.9); object-fit: cover; background: #fff; }
+.p-info { display: flex; flex-direction: column; gap: 6px; }
+.name-row { display: flex; align-items: center; gap: 8px; }
+.p-name { font-size: 22px; font-weight: bold; margin: 0; }
+.p-role { font-size: 11px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 8px; }
+.p-id { font-size: 13px; color: rgba(255,255,255,0.8); margin: 0; font-family: monospace; letter-spacing: 1px; }
+.settings-icon { position: absolute; top: 4px; right: 0; cursor: pointer; opacity: 0.9; }
+.settings-icon svg { width: 22px; height: 22px; }
+
+/* 底部链接 */
+.p-links { display: flex; justify-content: space-between; font-size: 14px; color: #fff; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15); }
+.p-links span { cursor: pointer; flex: 1; text-align: center; font-weight: 500; }
+.p-links span:first-child { text-align: left; }
+.p-links span:last-child { text-align: right; }
+
+/* 订单卡片：统一边距，不再飘忽 */
+.section { background: #fff; margin: 0 16px; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .section-header h3 { margin: 0; font-size: 16px; color: #1e293b; font-weight: bold; }
 .all-orders { font-size: 13px; color: #94a3b8; cursor: pointer; }
+
 .order-nav { display: flex; justify-content: space-between; }
 .nav-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; color: #475569; font-size: 13px; transition: color 0.2s; }
 .nav-item:hover { color: #3b82f6; }
-.nav-item svg { width: 26px; height: 26px; }
+.nav-item svg { width: 28px; height: 28px; stroke-width: 1.8; }
 </style>

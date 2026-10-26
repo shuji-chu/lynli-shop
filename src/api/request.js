@@ -2,7 +2,7 @@ import axios from 'axios'
 import { Toast } from '@/utils/toast'
 import router from '@/router' // 引入 router 以支持平滑跳转
 
-export const API_BASE = import.meta.env.VITE_API_BASE || 'https://api.lynli.me'
+export const API_BASE = import.meta.env.VITE_API_BASE || 'http://8.210.61.146'
 
 const request = axios.create({
   baseURL: API_BASE,

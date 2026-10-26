@@ -1,13 +1,21 @@
 <template>
   <div class="address-page">
-    <div class="header">
-      <button @click="$router.back()" class="back-btn">←</button>
-      <h2>{{ isSelectMode ? '选择收货地址' : '收货地址' }}</h2>
-      <div class="add-btn" @click="openAdd">新增地址</div>
+    <!-- 页面顶部导航（为了不跟全局导航栏打架，直接去掉多余 header，只留一个内部返回或标题，或者完全依赖全局导航栏） -->
+    <!-- 如果是从结算页跳过来的，顶部可以用底部导航返回，这里加个垫高层防遮挡 -->
+    
+    <!-- 1. 空状态：直接放在屏幕中间，超大按钮 -->
+    <div v-if="addresses.length === 0" class="empty-state">
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="60" cy="60" r="50" fill="#f0f7ff"/>
+        <path d="M60 30 C40 30 30 45 30 60 C30 80 60 100 60 100 C60 100 90 80 90 60 C90 45 80 30 60 30 Z" stroke="#bfdbfe" stroke-width="4"/>
+        <circle cx="60" cy="60" r="10" fill="#3b82f6"/>
+      </svg>
+      <p>您还没有添加收货地址</p>
+      <button class="big-add-btn" @click="openAdd">+ 新增收货地址</button>
     </div>
 
-    <div class="list" v-if="addresses.length">
-      <!-- 🚨 关键修改：如果是在选择模式下，点击整行触发选择；否则点击编辑图标 -->
+    <!-- 2. 地址列表 -->
+    <div v-else class="list">
       <div class="item" v-for="addr in addresses" :key="addr.id" @click="handleSelect(addr)">
         <div class="addr-top">
           <span class="region">{{ addr.province }} {{ addr.city }} {{ addr.district }}</span>
@@ -19,16 +27,20 @@
           <span class="tag" v-if="addr.is_default == 1">默认</span>
           <span class="tag orange" v-if="addr.tag">{{ addr.tag }}</span>
         </div>
-        <!-- 只有在非选择模式下，才显示编辑按钮 -->
+        <!-- 编辑按钮 -->
         <div class="edit-icon" v-if="!isSelectMode" @click.stop="openEdit(addr)">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#94a3b8" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </div>
       </div>
       <div class="end">到底啦</div>
     </div>
-    <div v-else class="empty">暂无收货地址，点击右上角新增</div>
 
-    <!-- 新增/编辑弹窗保持不变 -->
+    <!-- 3. 底部固定新增按钮（有地址时显示） -->
+    <div class="bottom-btn-wrap" v-if="addresses.length > 0">
+      <button class="big-add-btn" @click="openAdd">+ 新增收货地址</button>
+    </div>
+
+    <!-- 新增/编辑弹窗 -->
     <div class="modal-mask" v-if="showModal" @click.self="showModal = false">
       <div class="modal-content">
         <h3>{{ isEdit ? '编辑地址' : '新增地址' }}</h3>
@@ -60,8 +72,6 @@ const route = useRoute()
 const addresses = ref([])
 const showModal = ref(false)
 const isEdit = ref(false)
-
-// 判断是否为选择模式（从结算页跳转过来）
 const isSelectMode = ref(route.query.mode === 'select')
 
 const form = ref({ name: '', phone: '', province: '', city: '', district: '', detail: '', is_default: 0 })
@@ -77,11 +87,10 @@ const loadData = async () => {
 
 onMounted(loadData)
 
-// 选择地址逻辑
 const handleSelect = (addr) => {
   if (isSelectMode.value) {
     localStorage.setItem('selected_address', JSON.stringify(addr))
-    router.back() // 直接返回上一页（结算页）
+    router.back()
   }
 }
 
@@ -122,33 +131,40 @@ const deleteAddr = async (id) => {
 </script>
 
 <style scoped>
-.address-page { min-height: 100vh; background: #f4f4f4; padding-bottom: 20px; }
-.header { display: flex; justify-content: space-between; align-items: center; height: 50px; padding: 0 16px; background: #fff; position: sticky; top: 0; z-index: 10; }
-.back-btn { background: none; border: none; font-size: 24px; color: #333; }
-.header h2 { font-size: 17px; margin: 0; color: #333; }
-.add-btn { color: #ff5000; font-size: 14px; cursor: pointer; }
+/* 给顶部留出导航栏高度 */
+.address-page { min-height: 100vh; background: #f5f7fa; padding-top: 64px; padding-bottom: 20px; }
 
-.list { padding-top: 10px; }
-.item { background: #fff; padding: 16px; position: relative; margin-bottom: 10px; cursor: pointer; }
-.addr-top { font-size: 12px; color: #999; margin-bottom: 6px; }
-.detail { font-size: 16px; color: #333; margin: 0 0 8px; font-weight: 500; padding-right: 30px; }
-.info { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #333; }
-.tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #fff0e8; color: #ff5000; }
-.tag.orange { background: #fff0e8; color: #ff5000; }
-.edit-icon { position: absolute; right: 16px; bottom: 16px; padding: 4px; cursor: pointer; }
-.end { text-align: center; font-size: 13px; color: #999; padding: 20px 0; }
+/* 空状态居中 */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 100px; }
+.empty-state svg { width: 120px; height: 120px; margin-bottom: 20px; }
+.empty-state p { font-size: 15px; color: #64748b; margin-bottom: 24px; }
 
-.empty { text-align: center; padding: 50px 0; color: #999; }
+/* 超大按钮 */
+.big-add-btn { background: #3b82f6; color: #fff; border: none; padding: 14px 40px; border-radius: 24px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(59,130,246,0.3); cursor: pointer; }
 
+/* 列表样式 */
+.list { padding: 0 16px; }
+.item { background: #fff; padding: 16px; position: relative; border-radius: 12px; margin-bottom: 12px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+.addr-top { font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+.detail { font-size: 16px; color: #1e293b; margin: 0 0 8px; font-weight: bold; padding-right: 30px; }
+.info { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #334155; }
+.tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #eff6ff; color: #3b82f6; font-weight: bold; }
+.edit-icon { position: absolute; right: 16px; bottom: 16px; padding: 8px; cursor: pointer; }
+.end { text-align: center; font-size: 13px; color: #94a3b8; padding: 20px 0; }
+
+/* 底部固定按钮容器 */
+.bottom-btn-wrap { position: fixed; bottom: 20px; left: 0; right: 0; display: flex; justify-content: center; z-index: 10; }
+
+/* 弹窗样式 */
 .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-end; z-index: 100; }
 .modal-content { width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 20px; animation: slideUp 0.3s; }
 .modal-content h3 { margin: 0 0 16px; text-align: center; font-size: 16px; }
-.input { width: 100%; border: 1px solid #eee; border-radius: 8px; padding: 12px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; }
-.default-checkbox { display: flex; align-items: center; gap: 8px; font-size: 14px; margin: 10px 0 20px; cursor: pointer; }
+.input { width: 100%; border: 1px solid #eee; border-radius: 8px; padding: 12px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background: #f8fafc; }
+.default-checkbox { display: flex; align-items: center; gap: 8px; font-size: 14px; margin: 10px 0 20px; cursor: pointer; color: #334155; }
 .check { width: 18px; height: 18px; border-radius: 50%; border: 1px solid #ccc; }
-.check.active { background: #ff5000; border-color: #ff5000; }
+.check.active { background: #3b82f6; border-color: #3b82f6; }
 .modal-btns { display: flex; gap: 10px; }
-.save-btn { flex: 1; background: #ff5000; color: #fff; border: none; padding: 12px; border-radius: 20px; font-size: 15px; font-weight: bold; }
+.save-btn { flex: 1; background: #3b82f6; color: #fff; border: none; padding: 12px; border-radius: 20px; font-size: 15px; font-weight: bold; }
 .del-btn { background: #fee2e2; color: #ef4444; border: none; padding: 0 20px; border-radius: 20px; font-size: 15px; font-weight: bold; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 </style>

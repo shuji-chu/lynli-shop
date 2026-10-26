@@ -1,10 +1,11 @@
 <template>
-  <!-- 🚨 核心修复：只有在首页、购物车、我的这三个主页面，才显示顶部导航栏和底部Tab -->
+  <!-- 主页面显示导航 -->
   <template v-if="['/shop', '/cart', '/orders'].includes($route.path)">
     <NavBar />
   </template>
 
-  <main class="page" :class="{ 'is-auth': $route.path === '/' }">
+  <!-- 统一在这里给主页面留出顶部/底部间距，子页面绝对不准再写！ -->
+  <main class="page" :class="{ 'is-auth': $route.path === '/', 'has-nav': ['/shop', '/cart', '/orders'].includes($route.path) }">
     <router-view v-slot="{ Component }">
       <keep-alive :include="['HomeView', 'OrdersView', 'CartView']">
         <component :is="Component" />
@@ -16,7 +17,6 @@
     <BottomNav />
   </template>
   
-  <!-- Toast 和 客服是全局的，一直保留 -->
   <template v-if="$route.path !== '/'">
     <Toast />
     <ChatWidget />
@@ -32,6 +32,10 @@ import ChatWidget from '@/components/ChatWidget.vue'
 
 <style>
 .page { min-height: 100vh; box-sizing: border-box; }
+/* 🚨 核心：只有带导航的主页面才留间距，且只留一次！ */
+.page.has-nav {
+  padding-top: 56px;
+  padding-bottom: 70px; 
+}
 .page.is-auth { padding: 0; }
-.fade-enter-active, .fade-leave-to { transition: opacity 0.25s ease; }
 </style>

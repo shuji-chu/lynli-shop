@@ -1,7 +1,6 @@
 <template>
-  <!-- 留出顶部导航栏的高度 -->
   <div class="orders-page">
-    <!-- 1. 顶部个人信息卡片 -->
+    <!-- 1. 顶部个人信息卡片 (紧凑版) -->
     <div class="profile-header">
       <div class="p-top">
         <img :src="myAvatar" class="p-avatar" />
@@ -24,7 +23,7 @@
       </div>
     </div>
 
-    <!-- 2. 我的订单模块 -->
+    <!-- 2. 我的订单模块 (紧凑版) -->
     <div class="section">
       <div class="section-header">
         <h3>我的订单</h3>
@@ -118,58 +117,48 @@ onMounted(load)
 </script>
 
 <style scoped>
-/* 留出顶部导航栏的高度 */
-.orders-page { 
-  padding-top: 56px; 
-   
-  background: #f5f7fa; 
-  min-height: 100vh; 
-  box-sizing: border-box;
-}
+/* 🚨 彻底去掉双重 padding，统一由 App.vue 接管 */
+.orders-page { background: #f5f7fa; min-height: 100%; padding: 0; }
 
-/* 顶部通栏渐变卡片 */
+/* 顶部通栏渐变卡片 (降低了高度) */
 .profile-header { 
   background: linear-gradient(135deg, #3b82f6, #1e3a8a); 
-  padding: 32px 20px 24px; 
+  padding: 20px; 
   color: #fff; 
-  border-bottom-left-radius: 24px; 
-  border-bottom-right-radius: 24px; 
-  margin-bottom: 16px; 
-  box-shadow: 0 8px 20px rgba(59,130,246,0.2); 
+  border-bottom-left-radius: 20px; 
+  border-bottom-right-radius: 20px; 
+  margin-bottom: 12px; 
 }
-.p-top { display: flex; align-items: center; gap: 16px; position: relative; margin-bottom: 24px; }
-.p-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.9); object-fit: cover; background: #fff; }
-.p-info { display: flex; flex-direction: column; gap: 6px; }
+.p-top { display: flex; align-items: center; gap: 16px; position: relative; margin-bottom: 20px; }
+.p-avatar { width: 64px; height: 64px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.9); object-fit: cover; background: #fff; }
+.p-info { display: flex; flex-direction: column; gap: 4px; }
 .name-row { display: flex; align-items: center; gap: 8px; }
-.p-name { font-size: 22px; font-weight: bold; margin: 0; }
-.p-role { font-size: 11px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 8px; }
-.p-id { font-size: 13px; color: rgba(255,255,255,0.8); margin: 0; font-family: monospace; letter-spacing: 1px; }
-.settings-icon { position: absolute; top: 4px; right: 0; cursor: pointer; opacity: 0.9; }
-.settings-icon svg { width: 22px; height: 22px; }
+.p-name { font-size: 20px; font-weight: bold; margin: 0; }
+.p-role { font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 6px; }
+.p-id { font-size: 12px; color: rgba(255,255,255,0.8); margin: 0; font-family: monospace; }
+.settings-icon { position: absolute; top: 0; right: 0; cursor: pointer; opacity: 0.9; }
+.settings-icon svg { width: 20px; height: 20px; }
 
-/* 顶部链接 */
-.p-links { display: flex; justify-content: space-between; font-size: 14px; color: #fff; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15); }
+.p-links { display: flex; justify-content: space-between; font-size: 14px; color: #fff; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.15); }
 .p-links span { cursor: pointer; flex: 1; text-align: center; font-weight: 500; }
 .p-links span:first-child { text-align: left; }
 .p-links span:last-child { text-align: right; }
 
-/* 通用卡片 */
-.section { background: #fff; margin: 0 16px 16px; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.section-header h3 { margin: 0; font-size: 16px; color: #1e293b; font-weight: bold; }
-.all-orders { font-size: 13px; color: #94a3b8; cursor: pointer; }
+/* 通用卡片 (大幅缩小间距) */
+.section { background: #fff; margin: 0 12px 12px; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.section-header h3 { margin: 0; font-size: 15px; color: #1e293b; font-weight: bold; }
+.all-orders { font-size: 12px; color: #94a3b8; cursor: pointer; }
 
-/* 订单导航 */
 .order-nav { display: flex; justify-content: space-between; }
-.nav-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; color: #475569; font-size: 13px; }
-.nav-item svg { width: 28px; height: 28px; stroke-width: 1.8; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; color: #475569; font-size: 12px; }
+.nav-item svg { width: 24px; height: 24px; stroke-width: 1.5; }
 
-/* 菜单列表样式 */
-.menu-list { padding: 0 20px; }
-.menu-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
-.menu-item:last-child { border-bottom: none; }
-.m-left { display: flex; align-items: center; gap: 12px; font-size: 15px; color: #334155; font-weight: 500; }
-.m-left svg { width: 22px; height: 22px; }
-.m-right { display: flex; align-items: center; }
-.arrow { color: #cbd5e1; font-size: 14px; }
+/* 菜单列表 (行高缩紧) */
+.menu-list { padding: 0 16px; }
+.menu-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+.menu-item:last-child { border-bottom: none; padding-bottom: 0; }
+.m-left { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #334155; font-weight: 500; }
+.m-left svg { width: 20px; height: 20px; }
+.arrow { color: #cbd5e1; font-size: 13px; }
 </style>

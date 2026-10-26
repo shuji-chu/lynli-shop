@@ -53,7 +53,7 @@ onMounted(async () => {
 })
 </script>
 <style scoped>
-.home {   padding-top: 64px;  padding-bottom: 80px; min-height: 100vh; background: #f8fafc; }
+.home {     padding-bottom: 80px; min-height: 100vh; background: #f8fafc; }
 .search-wrap { padding: 12px 16px; }
 .search-box { background: #fff; padding: 10px 16px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
 .search-box input { width: 100%; border: none; outline: none; font-size: 15px; background: transparent; }

@@ -1,10 +1,8 @@
 <template>
-  <!-- 主页面显示导航 -->
   <template v-if="['/shop', '/cart', '/orders'].includes($route.path)">
     <NavBar />
   </template>
 
-  <!-- 统一在这里给主页面留出顶部/底部间距，子页面绝对不准再写！ -->
   <main class="page" :class="{ 'is-auth': $route.path === '/', 'has-nav': ['/shop', '/cart', '/orders'].includes($route.path) }">
     <router-view v-slot="{ Component }">
       <keep-alive :include="['HomeView', 'OrdersView', 'CartView']">
@@ -31,11 +29,11 @@ import ChatWidget from '@/components/ChatWidget.vue'
 </script>
 
 <style>
-.page { min-height: 100vh; box-sizing: border-box; }
-/* 🚨 核心：只有带导航的主页面才留间距，且只留一次！ */
+* { box-sizing: border-box; }
+.page { min-height: 100vh; }
 .page.has-nav {
   padding-top: 56px;
-  padding-bottom: 70px; 
+  padding-bottom: 80px; /* 统一留出底部大空间，彻底防遮挡 */
 }
 .page.is-auth { padding: 0; }
 </style>

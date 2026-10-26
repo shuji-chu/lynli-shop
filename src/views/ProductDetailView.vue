@@ -25,7 +25,7 @@
       <h3>私密评价 ({{ reviews.length }})</h3>
       <div class="review-list">
         <div v-for="(r, i) in reviews" :key="i" class="review-item">
-          <div class="r-head"><span>匿名用户 ({{ r.short_id }})</span><span>⭐{{ r.rating }}</span></div>
+          <div class="r-head"><span>匿名用户 ({{ r.short_id }}) <span class="ip-tag">{{ r.city || "未知" }}</span></span><span>⭐{{ r.rating }}</span></div>
           <p class="r-content">{{ r.content }}</p>
         </div>
         <p v-if="reviews.length === 0" style="text-align: center; color: #94a3b8; font-size: 13px;">暂无评价，来抢首评～</p>
@@ -136,4 +136,7 @@ const handleBuyNow = () => { addToCart(product.value); router.push('/cart'); }
 .add-cart, .buy-now { flex: 1; border-radius: 20px; border: none; font-size: 15px; font-weight: bold; }
 .add-cart { background: #eff6ff; color: #3b82f6; border: 1px solid #3b82f6; }
 .buy-now { background: #3b82f6; color: #fff; }
+
+.ip-tag { font-size: 10px; background: #f1f5f9; color: #64748b; padding: 1px 4px; border-radius: 4px; margin-left: 4px; font-weight: normal; }
+
 </style>

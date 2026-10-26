@@ -1,5 +1,5 @@
 <template>
-  <!-- 🚨 新增了点击空白处关闭历史记录的逻辑 -->
+  <!-- 点击空白处，关闭搜索历史面板 -->
   <div class="container home" @click="showHistory = false">
     
     <!-- 🎨 柔美透亮背景 (固定在底层) -->
@@ -10,6 +10,7 @@
     </div>
 
     <!-- 🔍 搜索框与历史记录 -->
+    <!-- @click.stop 阻止冒泡，防止点输入框时面板被关掉 -->
     <div class="search-wrap" @click.stop>
       <div class="search-box">
         <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
@@ -23,14 +24,16 @@
         <span v-if="keyword" class="clear-btn" @click="keyword = ''">×</span>
       </div>
       
-      <!-- 搜索历史 -->
+      <!-- 搜索历史 (只在输入框为空且聚焦时显示) -->
       <div class="history-wrap" v-if="historyList.length > 0 && showHistory && !keyword">
         <div class="history-header">
           <span>搜索历史</span>
           <span class="clear-history" @click="clearHistory">清空</span>
         </div>
         <div class="history-tags">
-          <span v-for="(item, index) in historyList" :key="index" class="tag" @click="clickHistory(item)">{{ item }}</span>
+          <span v-for="(item, index) in historyList" :key="index" class="tag" @click="clickHistory(item)">
+            {{ item }}
+          </span>
         </div>
       </div>
     </div>
@@ -82,7 +85,12 @@ const page = ref(1)
 const hasMore = ref(true)
 const keyword = ref('')
 const activeCategory = ref('')
+const showHistory = ref(false)
 
+// 🔥 历史记录读取 (本地存储)
+const historyList = ref(JSON.parse(localStorage.getItem('lynli_search_history') || '[]'))
+
+// 分类数据
 const categories = [
   { name: '全部', color: '#3b82f6' },
   { name: '情趣玩具', color: '#ec4899' },
@@ -91,23 +99,35 @@ const categories = [
   { name: '情侣共震', color: '#10b981' }
 ]
 
-const showHistory = ref(false)
-const historyList = ref(JSON.parse(localStorage.getItem('lynli_search_history') || '[]'))
-
+// 执行搜索并保存历史
 function handleSearch() {
   if (!keyword.value.trim()) return
   const kw = keyword.value.trim()
+  
+  // 去重，且最多保留 10 条
   historyList.value = [kw, ...historyList.value.filter(i => i !== kw)].slice(0, 10)
   localStorage.setItem('lynli_search_history', JSON.stringify(historyList.value))
   showHistory.value = false
 }
-function clickHistory(item) { keyword.value = item; handleSearch() }
-function clearHistory() { historyList.value = []; localStorage.removeItem('lynli_search_history') }
 
+// 点击历史标签
+function clickHistory(item) {
+  keyword.value = item
+  handleSearch()
+}
+
+// 清空历史
+function clearHistory() {
+  historyList.value = []
+  localStorage.removeItem('lynli_search_history')
+}
+
+// 切换分类
 function selectCategory(catName) {
   activeCategory.value = catName === '全部' ? '' : (activeCategory.value === catName ? '' : catName)
 }
 
+// 过滤商品 (分类 + 关键字)
 const filteredList = computed(() => {
   let list = products.value
   if (activeCategory.value) list = list.filter(p => p.category === activeCategory.value)
@@ -134,24 +154,24 @@ async function loadData() {
   } catch (e) { console.warn(e) } 
   finally { loading.value = false }
 }
+
 function loadMore() { if (!hasMore.value) return; page.value++; loadData() }
+
 onMounted(loadData)
 </script>
 
 <style scoped>
-/* 🚨 核心修复：高度 100vh 并允许纵向平滑滑动 */
+/* 🚨 滑动修复：不再锁死高度，让手机系统自然接管滚动，最丝滑 */
 .home { 
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch; /* iOS 丝滑滚动 */
   padding-top: 56px; 
-  padding-bottom: 80px; /* 留出底部导航栏的空间 */
+  padding-bottom: 80px; 
+  min-height: 100vh; 
   background: #f8fafc; 
   position: relative; 
+  overflow-x: hidden;
 }
 
-/* 背景光晕：固定不动 */
+/* 背景光晕固定 */
 .soft-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .glow { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; }
 .glow-pink { width: 350px; height: 400px; background: #fbcfe8; top: -80px; right: -100px; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: floatGlow 8s infinite alternate ease-in-out; }
@@ -160,19 +180,21 @@ onMounted(loadData)
 @keyframes floatGlow { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-20px, 30px) scale(1.1); } }
 
 /* 搜索框 */
-.search-wrap { padding: 12px 16px; position: relative; z-index: 10; }
-.search-box { display: flex; align-items: center; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-radius: 20px; padding: 10px 16px; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.search-wrap { padding: 12px 16px; position: relative; z-index: 100; }
+.search-box { display: flex; align-items: center; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px; padding: 10px 16px; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
 .search-box svg { width: 18px; height: 18px; margin-right: 10px; }
 .search-box input { flex: 1; border: none; outline: none; font-size: 15px; color: #1e293b; background: transparent; }
 .clear-btn { font-size: 20px; color: #94a3b8; cursor: pointer; padding: 0 5px; }
 
-/* 搜索历史 */
-.history-wrap { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 12px; padding: 15px; margin-top: 10px; border: 1px solid #e2e8f0; position: absolute; left: 16px; right: 16px; z-index: 20; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-.history-header { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 10px; }
+/* 搜索历史悬浮窗 */
+.history-wrap { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); border-radius: 12px; padding: 15px; margin-top: 8px; border: 1px solid #e2e8f0; position: absolute; left: 16px; right: 16px; z-index: 20; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.history-header { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 12px; }
+.clear-history { cursor: pointer; color: #94a3b8; }
 .history-tags { display: flex; flex-wrap: wrap; gap: 10px; }
-.tag { background: #f1f5f9; color: #475569; font-size: 13px; padding: 5px 12px; border-radius: 15px; cursor: pointer; }
+.tag { background: #f1f5f9; color: #475569; font-size: 13px; padding: 6px 14px; border-radius: 15px; cursor: pointer; transition: all 0.2s; }
+.tag:active { background: #e2e8f0; transform: scale(0.95); }
 
-/* 分类图标导航 */
+/* 分类导航 */
 .category-nav { display: flex; overflow-x: auto; padding: 0 16px 16px; gap: 16px; position: relative; z-index: 2; scrollbar-width: none; }
 .category-nav::-webkit-scrollbar { display: none; }
 .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0; }
@@ -181,7 +203,7 @@ onMounted(loadData)
 .cat-icon svg { width: 24px; height: 24px; }
 .cat-item span { font-size: 12px; color: #475569; font-weight: 500; }
 
-/* 高级 Banner */
+/* Banner */
 .banner { margin: 0 16px 20px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 16px; padding: 24px; position: relative; overflow: hidden; z-index: 2; box-shadow: 0 10px 20px rgba(59,130,246,0.2); }
 .banner-content { position: relative; z-index: 2; }
 .banner h2 { font-size: 20px; color: #fff; margin: 0 0 6px; font-weight: 800; }

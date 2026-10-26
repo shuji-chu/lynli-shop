@@ -10,7 +10,6 @@
       <!-- ================= 登录模式 ================= -->
       <form v-if="mode === 'login'" @submit.prevent="submit" class="form-body">
         <input v-model="form.email" type="email" placeholder="请输入邮箱" required class="input-field" />
-        
         <input v-model="form.password" type="password" placeholder="请输入密码" required class="input-field" />
 
         <div class="code-group">
@@ -80,8 +79,14 @@
         </div>
       </form>
 
+      <!-- 🚨 底部常驻协议声明区 -->
+      <div class="privacy-footer">
+        登录即代表同意 <a @click.prevent="openModal('privacy')" href="#">《用户隐私协议》</a> 和 <a @click.prevent="openModal('terms')" href="#">《服务条款》</a>
+      </div>
+
     </div>
 
+    <!-- 隐私弹窗组件 -->
     <PrivacyModal :show="showModal" :type="modalType" @close="showModal = false" />
   </div>
 </template>
@@ -131,13 +136,11 @@ let paperScope = null
 onMounted(() => {
   generateCaptcha()
   
-  // 自动登录逻辑
   const token = localStorage.getItem('token')
   if (token && token !== 'undefined' && token !== 'null') {
     router.replace('/shop')
   }
   
-  // 记住密码回填
   const savedEmail = localStorage.getItem('saved_email')
   const savedPwd = localStorage.getItem('saved_pwd')
   if (savedEmail && savedPwd) {
@@ -146,7 +149,6 @@ onMounted(() => {
     rememberMe.value = true
   }
 
-  // Canvas 动画
   const canvas = document.getElementById('canvas')
   paperScope = new paper.PaperScope()
   paperScope.setup(canvas)
@@ -228,12 +230,10 @@ const sendEmailCode = async () => {
 }
 
 const submit = async () => {
-  // 登录校验
   if (mode.value === 'login' && form.captcha.toUpperCase() !== captchaText.value) {
     alert('图形验证码错误'); generateCaptcha(); form.captcha = ''; return
   }
   
-  // 注册校验
   if (mode.value === 'register') {
     if (form.password !== form.rePassword) return alert('两次输入的密码不一致')
     if (!agreePrivacy.value) return alert('请先阅读并勾选用户隐私协议')
@@ -270,7 +270,6 @@ const submit = async () => {
         return
       }
       
-      // 处理记住密码
       if (mode.value === 'login') {
         if (rememberMe.value) {
           localStorage.setItem('saved_email', form.email)
@@ -326,7 +325,7 @@ const submit = async () => {
   max-width: 380px;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
-  padding: 40px 30px;
+  padding: 40px 30px 20px;
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(30, 58, 138, 0.1);
   z-index: 10;
@@ -434,5 +433,20 @@ const submit = async () => {
   color: #3b82f6;
   font-weight: bold;
   cursor: pointer;
+}
+
+/* 🚨 常驻的底部协议 */
+.privacy-footer {
+  text-align: center;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.privacy-footer a {
+  color: #3b82f6;
+  text-decoration: none;
 }
 </style>

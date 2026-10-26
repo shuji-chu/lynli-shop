@@ -14,12 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
+      # 强制指定 Node 22 版本，与本地一致
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+          
+      # 弃用容易报错的 npm ci，改用更兼容的 npm install
+      - run: npm install
+      
       - run: npm run build
+      
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

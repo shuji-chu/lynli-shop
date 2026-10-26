@@ -11,6 +11,7 @@
       </transition>
     </router-view>
   </main>
+  <ChatWidget v-if="$route.path !== '/auth'" />
 
   <!-- 登录页不显示底部 Tab 和提示 -->
   <template v-if="$route.path !== '/'">
@@ -23,6 +24,7 @@
 import NavBar from '@/components/NavBar.vue'
 import BottomNav from '@/components/BottomNav.vue'
 import Toast from '@/components/Toast.vue'
+import ChatWidget from '@/components/ChatWidget.vue'
 // 🚨 暂时移除 DynamicBackground，大概率是它导致的白屏
 </script>
 

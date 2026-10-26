@@ -7,15 +7,15 @@
         <img :src="myAvatar" class="p-avatar" />
         <div class="p-info">
           <h3 class="p-name">{{ myNickname }}</h3>
-          <p class="p-role" v-if="userInfo.role === 'super' || userInfo.role === 'admin'">👑 尊贵的管理员</p>
+          <p class="p-role" v-if="userInfo.role === 'super' || userInfo.role === 'admin'">尊贵的管理员</p>
         </div>
       </div>
       
       <!-- 快捷功能入口 -->
       <div class="p-links">
-        <span @click="showToast('暂未开放，敬请期待')">📍 收货地址</span>
-        <span @click="showToast('暂未开放，敬请期待')">🛡️ 账号与安全</span>
-        <span @click="showToast('暂未开放，敬请期待')">🎧 联系客服</span>
+        <span @click="showToast('暂未开放')">收货地址</span>
+        <span @click="showToast('暂未开放')">账号与安全</span>
+        <span @click="showToast('暂未开放')">联系客服</span>
       </div>
     </div>
 
@@ -23,29 +23,29 @@
     <div class="section">
       <div class="section-header">
         <h3>我的订单</h3>
-        <span class="all-orders" @click="currentTab = 'all'">全部订单 ></span>
+        <span class="all-orders" @click="currentTab = 'all'">全部订单 &gt;</span>
       </div>
 
-      <!-- 订单状态图标导航 -->
+      <!-- 订单状态图标导航 (纯SVG) -->
       <div class="order-nav">
         <div class="nav-item" @click="currentTab = 'unpaid'">
-          <div class="icon-box">💳</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
           <span>待付款</span>
         </div>
         <div class="nav-item" @click="currentTab = 'unshipped'">
-          <div class="icon-box">📦</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           <span>待发货</span>
         </div>
         <div class="nav-item" @click="currentTab = 'shipped'">
-          <div class="icon-box">🚚</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           <span>待收货</span>
         </div>
         <div class="nav-item" @click="currentTab = 'completed'">
-          <div class="icon-box">⭐</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           <span>待评价</span>
         </div>
         <div class="nav-item" @click="currentTab = 'refund'">
-          <div class="icon-box">🔄</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
           <span>退款/售后</span>
         </div>
       </div>
@@ -53,16 +53,15 @@
       <!-- 订单列表展示区 -->
       <div class="order-content">
         <div v-if="loading" class="loading">加载中...</div>
-        
         <div v-else-if="filteredList.length === 0" class="empty-orders">
-          <p>这里空空如也～</p>
+          <p>暂无相关订单</p>
           <button @click="$router.push('/shop')" class="go-shop-btn">去逛逛</button>
         </div>
 
         <ul v-else class="order-list">
           <li v-for="o in filteredList" :key="o.id || o.trade_no" class="order-item">
             <div class="o-head">
-              <span>订单号：{{ o.trade_no || o.id }}</span>
+              <span class="o-no">订单号：{{ o.trade_no || o.id }}</span>
               <span class="o-status">{{ o.status }}</span>
             </div>
             <div class="o-foot">
@@ -74,19 +73,23 @@
       </div>
     </div>
 
-    <!-- 3. 我的资产 / 工具区（预留占位） -->
+    <!-- 3. 我的资产 / 工具区 (纯SVG) -->
     <div class="section tools-section">
       <div class="tool-item" @click="showToast('功能开发中')">
-        <span class="t-icon">🎟️</span> 优惠券
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16v12H4z"/><path d="M4 10h16"/><path d="M8 15h4"/></svg>
+        <span>优惠券</span>
       </div>
       <div class="tool-item" @click="showToast('功能开发中')">
-        <span class="t-icon">💎</span> 积分
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>积分</span>
       </div>
       <div class="tool-item" @click="showToast('功能开发中')">
-        <span class="t-icon">❤️</span> 我的收藏
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span>收藏</span>
       </div>
       <div class="tool-item" @click="showToast('功能开发中')">
-        <span class="t-icon">👣</span> 我的足迹
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>足迹</span>
       </div>
     </div>
 
@@ -107,8 +110,6 @@ import { getMyOrders } from '@/api/order'
 const router = useRouter()
 const list = ref([])
 const loading = ref(true)
-
-// 订单状态分类控制
 const currentTab = ref('all')
 
 const userInfo = computed(() => {
@@ -125,11 +126,8 @@ const showToast = (msg) => {
   else alert(msg)
 }
 
-// 过滤显示不同的订单状态
 const filteredList = computed(() => {
   if (currentTab.value === 'all') return list.value
-  // 这里的过滤逻辑需要根据你后端实际返回的 status 字段来适配
-  // 比如后端返回 'pending', 'paid', 'shipped' 等
   return list.value.filter(o => {
     const s = (o.status || '').toLowerCase()
     if (currentTab.value === 'unpaid') return s === 'pending' || s === 'unpaid'
@@ -195,24 +193,27 @@ onMounted(load)
 
 /* 订单状态图标 */
 .order-nav { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; }
-.nav-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; color: #475569; font-size: 13px; }
-.icon-box { font-size: 24px; background: #f8fafc; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid #f1f5f9; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; color: #475569; font-size: 13px; transition: color 0.2s; }
+.nav-item:hover { color: #3b82f6; }
+.nav-item svg { width: 26px; height: 26px; }
 
 /* 订单列表 */
 .order-content { min-height: 120px; }
+.loading { text-align: center; padding: 20px 0; color: #94a3b8; font-size: 14px; }
 .empty-orders { text-align: center; padding: 20px 0; color: #94a3b8; font-size: 14px; }
-.go-shop-btn { margin-top: 12px; background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; padding: 8px 24px; border-radius: 20px; cursor: pointer; }
+.go-shop-btn { margin-top: 12px; background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; padding: 8px 24px; border-radius: 20px; cursor: pointer; font-weight: 500; }
 .order-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
 .order-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; }
 .o-head { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 10px; }
-.o-status { color: #3b82f6; font-weight: bold; }
+.o-status { color: #3b82f6; font-weight: 500; }
 .o-foot { display: flex; justify-content: space-between; font-size: 13px; color: #94a3b8; }
 .o-amount { color: #f59e0b; font-weight: bold; font-size: 15px; }
 
 /* 工具区 */
-.tools-section { display: flex; justify-content: space-around; padding: 20px 10px; }
-.tool-item { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; color: #475569; cursor: pointer; }
-.t-icon { font-size: 22px; }
+.tools-section { display: flex; justify-content: space-around; padding: 24px 10px; }
+.tool-item { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; color: #475569; cursor: pointer; transition: color 0.2s; }
+.tool-item:hover { color: #3b82f6; }
+.tool-item svg { width: 24px; height: 24px; }
 
 /* 退出登录 */
 .logout-section { margin-top: 24px; }

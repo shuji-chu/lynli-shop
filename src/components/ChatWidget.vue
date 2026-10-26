@@ -4,18 +4,32 @@
       <svg v-if="!isOpen" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
       <svg v-else viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </div>
+
     <transition name="chat-pop">
       <div class="chat-window" v-if="isOpen">
-        <div class="chat-header"><div class="ai-info"><span class="status-dot"></span><span class="ai-name">LYNLI 专属客服</span></div></div>
+        <div class="chat-header">
+          <div class="ai-info">
+            <span class="status-dot"></span>
+            <span class="ai-name">LYNLI 专属客服</span>
+          </div>
+        </div>
+        
         <div class="chat-messages" ref="msgContainer">
-          <div class="msg-row ai"><div class="avatar">AI</div><div class="bubble">您好，我是您的专属 AI 客服，请问有什么可以帮您？</div></div>
+          <div class="msg-row ai">
+            <div class="avatar">AI</div>
+            <div class="bubble">您好，我是您的专属 AI 客服，请问有什么可以帮您？</div>
+          </div>
           <div v-for="(msg, i) in messages" :key="i" class="msg-row" :class="msg.role">
             <div class="avatar" v-if="msg.role === 'ai'">AI</div>
             <div class="bubble">{{ msg.content }}</div>
             <div class="avatar" v-if="msg.role === 'user'">我</div>
           </div>
-          <div v-if="loading" class="msg-row ai"><div class="avatar">AI</div><div class="bubble typing">正在输入...</div></div>
+          <div v-if="loading" class="msg-row ai">
+            <div class="avatar">AI</div>
+            <div class="bubble typing">正在思考...</div>
+          </div>
         </div>
+
         <div class="chat-input-area">
           <input v-model="inputText" @keyup.enter="sendMsg" placeholder="请输入您的问题..." />
           <button @click="sendMsg" :disabled="loading">发送</button>
@@ -24,35 +38,74 @@
     </transition>
   </div>
 </template>
+
 <script setup>
-import { ref, nextTick } from 'vue'
-const isOpen = ref(false), inputText = ref(''), messages = ref([]), loading = ref(false), msgContainer = ref(null)
-function toggleChat() { isOpen.value = !isOpen.value; if (isOpen.value) scrollToBottom() }
+import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+
+const isOpen = ref(false)
+const inputText = ref('')
+const messages = ref([])
+const loading = ref(false)
+const msgContainer = ref(null)
+
+function toggleChat() {
+  isOpen.value = !isOpen.value
+  if (isOpen.value) scrollToBottom()
+}
+
+// 🚨 监听全局事件，外部点击“AI助手”时唤起聊天框
+const handleGlobalOpen = () => {
+  isOpen.value = true
+  scrollToBottom()
+}
+
+onMounted(() => {
+  window.addEventListener('open-ai-chat', handleGlobalOpen)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('open-ai-chat', handleGlobalOpen)
+})
+
 async function sendMsg() {
   if (!inputText.value.trim() || loading.value) return
   const text = inputText.value
   messages.value.push({ role: 'user', content: text })
-  inputText.value = ''; loading.value = true; scrollToBottom()
+  inputText.value = ''
+  loading.value = true
+  scrollToBottom()
+
   try {
     const res = await fetch('https://api.lynli.me/api/ai_agent', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text })
     })
     const data = await res.json()
+    
     let reply = 'AI 没返回内容'
     if (data.choices && data.choices.length > 0) reply = data.choices[0].message.content
     else if (data.data && data.data.reply) reply = data.data.reply
     else if (data.message) reply = data.message
-    else if (data.msg) reply = data.msg
+    
     messages.value.push({ role: 'ai', content: reply })
   } catch (e) {
     messages.value.push({ role: 'ai', content: '网络异常，请稍后再试。' })
-  } finally { loading.value = false; scrollToBottom() }
+  } finally {
+    loading.value = false
+    scrollToBottom()
+  }
 }
-function scrollToBottom() { nextTick(() => { if (msgContainer.value) msgContainer.value.scrollTop = msgContainer.value.scrollHeight }) }
+
+function scrollToBottom() {
+  nextTick(() => {
+    if (msgContainer.value) msgContainer.value.scrollTop = msgContainer.value.scrollHeight
+  })
+}
 </script>
+
 <style scoped>
-/* 保持原样，不用动 */
+/* 样式完全保持不变 */
 .chat-widget { position: fixed; bottom: 90px; right: 20px; z-index: 999; }
 .chat-btn { width: 50px; height: 50px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); cursor: pointer; }
 .chat-window { position: absolute; bottom: 60px; right: 0; width: 300px; height: 420px; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; }
@@ -62,12 +115,15 @@ function scrollToBottom() { nextTick(() => { if (msgContainer.value) msgContaine
 .chat-messages { flex: 1; padding: 16px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 12px; }
 .msg-row { display: flex; align-items: flex-start; gap: 8px; }
 .msg-row.user { flex-direction: row-reverse; }
-.avatar { width: 28px; height: 28px; border-radius: 50%; background: #3b82f6; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; background: #3b82f6; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .msg-row.user .avatar { background: #cbd5e1; }
-.bubble { max-width: 75%; padding: 10px 12px; border-radius: 12px; font-size: 13px; }
+.bubble { max-width: 75%; padding: 10px 12px; border-radius: 12px; font-size: 13px; line-height: 1.4; word-break: break-all; }
 .msg-row.ai .bubble { background: #fff; color: #334155; }
 .msg-row.user .bubble { background: #3b82f6; color: #fff; }
+.bubble.typing { color: #94a3b8; font-style: italic; }
 .chat-input-area { padding: 12px; background: #fff; border-top: 1px solid #f1f5f9; display: flex; gap: 8px; }
-.chat-input-area input { flex: 1; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 20px; padding: 8px 14px; font-size: 13px; }
+.chat-input-area input { flex: 1; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 20px; padding: 8px 14px; font-size: 13px; outline: none; }
 .chat-input-area button { background: #3b82f6; color: #fff; border: none; padding: 0 16px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+.chat-pop-enter-active, .chat-pop-leave-active { transition: all 0.3s ease; }
+.chat-pop-enter-from, .chat-pop-leave-to { opacity: 0; transform: translateY(20px) scale(0.95); }
 </style>

@@ -2,7 +2,16 @@
   <header class="navbar">
     <div class="container bar">
       <router-link to="/" class="brand">
-        <img src="/logo.png" style="height:32px;width:auto;border-radius:6px;">
+        <svg viewBox="0 0 100 100" style="height:32px; width:32px; margin-right:8px;" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="drop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a1c4fd" />
+      <stop offset="100%" stop-color="#c2e9fb" />
+    </linearGradient>
+  </defs>
+  <path d="M50 10 C50 10 20 45 20 65 A30 30 0 0 0 80 65 C80 45 50 10 50 10 Z" fill="url(#drop)"/>
+  <circle cx="50" cy="65" r="10" fill="rgba(255,255,255,0.6)"/>
+</svg>
         <span class="brand-text">LYNLI<i>泠礼</i></span>
       </router-link>
 

@@ -1,146 +1,135 @@
 <template>
-  <article class="card" @click="goDetail">
+  <div class="card" @click="goDetail">
     <div class="img-wrap">
-      <div v-if="!loaded" class="skeleton img-skel"></div>
+      <!-- 骨架屏 -->
+      <div v-if="!loaded && !error" class="skeleton img-skel"></div>
+      <!-- 真实图片，带 @error 兜底 -->
       <img
-        v-show="loaded"
-        :src="product.image || product.image_url || product.cover"
-        :alt="product.title || product.name"
+        v-show="loaded && !error"
+        :src="product.image"
+        :alt="product.title"
         loading="lazy"
         @load="loaded = true"
-        @error="onError"
+        @error="handleError"
       />
-      <button class="add" @click.stop="onAdd" aria-label="加入购物车">+</button>
+      <!-- 加载失败兜底图 -->
+      <div v-if="error" class="fallback-img">
+        <span class="icon">📦</span>
+        <span class="text">图片加载中</span>
+      </div>
     </div>
     <div class="info">
       <h3 class="title">{{ product.title || product.name }}</h3>
-      <p v-if="product.desc || product.subtitle" class="desc">
-        {{ product.desc || product.subtitle }}
-      </p>
+      <p class="category" v-if="product.category">{{ product.category }}</p>
       <div class="bottom">
-        <span class="price">{{ formatPrice(markupPrice(product.price)) }}</span>
-        <span v-if="product.tag" class="tag">{{ product.tag }}</span>
+        <span class="price">{{ formatPrice(product.price) }}</span>
+        <span class="sold">已售 {{ product.sold || 0 }}</span>
       </div>
     </div>
-  </article>
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { formatPrice } from '@/utils/format'
-import { markupPrice } from '@/utils/price'
-import { addToCart } from '@/store/cart'
-import { Toast } from '@/utils/toast'
 
 const props = defineProps({
-  product: { type: Object, required: true }
+  product: {
+    type: Object,
+    required: true
+  }
 })
+
 const router = useRouter()
 const loaded = ref(false)
+const error = ref(false)
 
-function onError() {
+const goDetail = () => {
+  router.push(`/product/${props.product.id}`)
+}
+
+const handleError = () => {
   loaded.value = true
-}
-function onAdd() {
-  addToCart(props.product, 1)
-  Toast.success('已加入购物车')
-}
-function goDetail() {
-  router.push({ name: 'product', params: { id: props.product.id } })
+  error.value = true
 }
 </script>
 
 <style scoped>
 .card {
-  position: relative;
-  border-radius: var(--radius);
+  background: #fff;
+  border-radius: 12px;
   overflow: hidden;
-  border: 1px solid var(--border);
-  background: var(--panel);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.35s, box-shadow 0.35s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
 }
 .card:hover {
-  transform: translateY(-6px);
-  border-color: var(--border-strong);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 .img-wrap {
-  position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: rgba(47, 107, 224, 0.05);
-  overflow: hidden;
+  position: relative;
+  background: #f8fafc;
 }
 .img-wrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s ease;
+  display: block;
 }
-.card:hover .img-wrap img {
-  transform: scale(1.06);
-}
-.img-skel {
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-}
-.add {
+.skeleton {
   position: absolute;
-  right: 12px;
-  bottom: 12px;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  font-size: 22px;
-  line-height: 1;
-  color: #fff;
-  background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-  box-shadow: 0 6px 16px rgba(47, 107, 224, 0.32);
-  transition: transform 0.2s;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
 }
-.add:active {
-  transform: scale(0.9);
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
-.info {
-  padding: 14px 14px 18px;
-}
-.title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-1);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.desc {
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--text-3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.bottom {
-  margin-top: 12px;
+.fallback-img {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  background: #eff6ff;
+  color: #94a3b8;
+  font-size: 13px;
+  gap: 8px;
 }
-.price {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--gold-bright);
+.fallback-img .icon { font-size: 28px; }
+.info { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.title {
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 600;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+  line-height: 1.4;
+  height: 39px;
 }
-.tag {
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 8px;
-  color: var(--gold);
-  border: 1px solid var(--border-strong);
+.category {
+  font-size: 12px;
+  color: #3b82f6;
+  background: #eff6ff;
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin: 0;
+  width: fit-content;
 }
+.bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 4px; }
+.price { font-size: 16px; font-weight: bold; color: #3b82f6; }
+.sold { font-size: 12px; color: #94a3b8; }
 </style>

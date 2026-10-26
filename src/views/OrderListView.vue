@@ -7,9 +7,7 @@
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ff5000" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         <input type="text" placeholder="搜索订单" />
       </div>
-      <div class="header-right">
-        <span>AI助手</span>
-      </div>
+      <div class="header-right"><span>AI助手</span></div>
     </div>
 
     <!-- 状态分类 Tab (可横向滑动) -->
@@ -27,13 +25,12 @@
 
     <!-- 订单列表区 -->
     <div class="order-content" v-if="filteredOrders.length > 0">
-      <div class="order-card" v-for="order in filteredOrders" :key="order.id">
+      <div class="order-card" v-for="order in filteredOrders" :key="order.id || order.trade_no">
         <div class="card-header">
           <span>订单号: {{ order.trade_no }}</span>
-          <span class="status">{{ order.status_text || '待付款' }}</span>
+          <span class="status">{{ getStatusText(order.status) }}</span>
         </div>
         <div class="card-body">
-          <!-- 这里为了演示简单，暂时不展开多商品，只显示总价 -->
           <p>总金额: ¥{{ order.total_amount }}</p>
           <p class="time">{{ formatTime(order.created_at) }}</p>
         </div>
@@ -73,21 +70,35 @@ import ProductCard from '@/components/ProductCard.vue'
 import { getProducts } from '@/api/product'
 import request from '@/api/request'
 
-const currentTab = ref('all')
+const route = useRoute()
+// 获取 URL 上的 tab 参数，默认是全部
+const currentTab = ref(route.query.tab || 'all')
+
 const tabs = [
   { label: '全部', value: 'all' },
-  { label: '待付款', value: 'pending' },
-  { label: '待发货', value: 'paid' },
-  { label: '待收货', value: 'shipped' },
+  { label: '待付款', value: '0' },
+  { label: '待发货', value: '1' },
+  { label: '待收货', value: '2' },
+  { label: '待评价', value: '3' },
   { label: '退款/售后', value: 'refund' }
 ]
 
 const orders = ref([])
 const recommendProducts = ref([])
 
+// 100% 容错的状态映射，不管后端返回数字还是字符串都能匹配
+const getStatusText = (status) => {
+  const s = String(status).toLowerCase()
+  if (s === '0' || s === 'pending' || s === 'unpaid') return '待付款'
+  if (s === '1' || s === 'paid') return '待发货'
+  if (s === '2' || s === 'shipped') return '待收货'
+  if (s === '3' || s === 'completed') return '已完成'
+  return '未知状态'
+}
+
 const filteredOrders = computed(() => {
   if (currentTab.value === 'all') return orders.value
-  return orders.value.filter(o => o.status == currentTab.value)
+  return orders.value.filter(o => String(o.status) === String(currentTab.value))
 })
 
 const formatTime = (ts) => {
@@ -97,7 +108,6 @@ const formatTime = (ts) => {
 }
 
 onMounted(async () => {
-  // 1. 获取我的订单
   try {
     const res = await request.get('/api/v1/user/orders')
     orders.value = res.data || res || []
@@ -105,7 +115,6 @@ onMounted(async () => {
     console.warn('获取订单失败', e)
   }
 
-  // 2. 获取推荐商品 (调用首页同一个接口)
   try {
     const pRes = await getProducts({ page: 1, size: 10 })
     recommendProducts.value = Array.isArray(pRes) ? pRes : (pRes?.data || [])

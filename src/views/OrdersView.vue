@@ -24,17 +24,17 @@
         <span class="all-orders" @click="$router.push('/order-list?tab=all')">全部订单 &gt;</span>
       </div>
       <div class="order-nav">
-        <!-- 🚨 核心修复：每个图标带上专属的 tab 参数 -->
-        <div class="nav-item" @click="$router.push('/order-list?tab=pending')">
+        <!-- 注意：这里的 tab 参数直接传后端数据库的 status 值 -->
+        <div class="nav-item" @click="$router.push('/order-list?tab=0')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg><span>待付款</span>
         </div>
-        <div class="nav-item" @click="$router.push('/order-list?tab=paid')">
+        <div class="nav-item" @click="$router.push('/order-list?tab=1')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><span>待发货</span>
         </div>
-        <div class="nav-item" @click="$router.push('/order-list?tab=shipped')">
+        <div class="nav-item" @click="$router.push('/order-list?tab=2')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><span>待收货</span>
         </div>
-        <div class="nav-item" @click="$router.push('/order-list?tab=completed')">
+        <div class="nav-item" @click="$router.push('/order-list?tab=3')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span>待评价</span>
         </div>
         <div class="nav-item" @click="$router.push('/order-list?tab=refund')">
@@ -88,12 +88,10 @@ onMounted(load)
 .settings-icon svg { width: 20px; height: 20px; }
 .p-links { display: flex; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.9); border-top: 1px solid rgba(255,255,255,0.2); padding-top: 16px; }
 .p-links span { cursor: pointer; }
-
 .section { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .section-header h3 { margin: 0; font-size: 16px; color: #1e293b; font-weight: bold; }
 .all-orders { font-size: 13px; color: #94a3b8; cursor: pointer; }
-
 .order-nav { display: flex; justify-content: space-between; }
 .nav-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; color: #475569; font-size: 13px; transition: color 0.2s; }
 .nav-item:hover { color: #3b82f6; }

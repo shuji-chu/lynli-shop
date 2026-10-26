@@ -129,7 +129,7 @@ const goCheckout = () => {
 
 <style scoped>
 /* 全局底色 */
-.cart-page { padding-top: 0;  padding-top: 64px; min-height: 100vh; background: #f8fafc; padding-bottom: 70px; }
+.cart-page {   padding-top: 64px; min-height: 100vh; background: #f8fafc; padding-bottom: 70px; }
 
 /* 顶部导航 */
 .header { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 100; border-bottom: 1px solid #f1f5f9; }

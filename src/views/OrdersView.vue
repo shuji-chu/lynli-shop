@@ -121,7 +121,7 @@ onMounted(load)
 
 <style scoped>
 /* 统一背景色，消除底部突兀的白边 */
-.orders-page { padding-top: 0; background: #f5f7fa; min-height: 100%; }
+.orders-page {  background: #f5f7fa; min-height: 100%; }
 
 /* 🚨 核心协调：顶部卡片也变成带边距的圆角卡片，与下面完美对齐 */
 .profile-header { 

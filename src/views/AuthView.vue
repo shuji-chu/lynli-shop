@@ -294,7 +294,7 @@ const submit = async () => {
       if (token) { 
         localStorage.setItem('token', token)
         localStorage.setItem('userInfo', JSON.stringify(finalUserInfo))
-        router.push('/shop') 
+        window.location.href = '/shop' 
       } else { 
         // 🚨 重点：如果没拿到 token，把服务器返回的原始数据打出来给你看！
         showToast('后端返回数据异常: ' + JSON.stringify(data)) 

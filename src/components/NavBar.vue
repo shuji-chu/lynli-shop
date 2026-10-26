@@ -1,22 +1,22 @@
 <template>
   <header class="navbar">
     <div class="container bar">
-      <router-link to="/" class="brand">
+      <router-link to="/shop" class="brand">
         <svg viewBox="0 0 100 100" style="height:32px; width:32px; margin-right:8px;" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="drop" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#a1c4fd" />
-      <stop offset="100%" stop-color="#c2e9fb" />
-    </linearGradient>
-  </defs>
-  <path d="M50 10 C50 10 20 45 20 65 A30 30 0 0 0 80 65 C80 45 50 10 50 10 Z" fill="url(#drop)"/>
-  <circle cx="50" cy="65" r="10" fill="rgba(255,255,255,0.6)"/>
-</svg>
+          <defs>
+            <linearGradient id="drop" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#a1c4fd" />
+              <stop offset="100%" stop-color="#c2e9fb" />
+            </linearGradient>
+          </defs>
+          <path d="M50 10 C50 10 20 45 20 65 A30 30 0 0 0 80 65 C80 45 50 10 50 10 Z" fill="url(#drop)"/>
+          <circle cx="50" cy="65" r="10" fill="rgba(255,255,255,0.6)"/>
+        </svg>
         <span class="brand-text">LYNLI<i>泠礼</i></span>
       </router-link>
 
       <nav class="links">
-        <router-link to="/" active-class="active">首页</router-link>
+        <router-link to="/shop" active-class="active">首页</router-link>
         <router-link to="/cart" active-class="active">购物车</router-link>
         <router-link v-if="isLoggedIn" to="/orders" active-class="active">我的订单</router-link>
       </nav>
@@ -32,8 +32,11 @@
         </router-link>
 
         <router-link v-if="!isLoggedIn" to="/auth" class="btn-ghost sm">登录</router-link>
-        <router-link v-else to="/orders" class="icon-btn" aria-label="我的">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        
+        <!-- 🔥 登录后：显示真实头像或默认图标 -->
+        <router-link v-else to="/orders" class="avatar-btn">
+          <img v-if="userInfo?.avatar" :src="userInfo.avatar" alt="头像" class="avatar-img" />
+          <svg v-else viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="8" r="3.5" />
             <path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" />
           </svg>
@@ -44,8 +47,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { isLoggedIn } from '@/store/user'
 import { totalCount } from '@/store/cart'
+
+// 解析本地存储的 userInfo
+const userInfo = computed(() => {
+  const data = localStorage.getItem('userInfo')
+  return data ? JSON.parse(data) : null
+})
 </script>
 
 <style scoped>
@@ -55,7 +65,7 @@ import { totalCount } from '@/store/cart'
   left: 0;
   right: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--border);
@@ -66,17 +76,16 @@ import { totalCount } from '@/store/cart'
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
 }
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-.logo {
-  height: 38px;
-  width: 38px;
-  border-radius: 50%;
-  object-fit: cover;
+  text-decoration: none;
+  color: var(--text-1);
 }
 .brand-text {
   font-size: 19px;
@@ -102,12 +111,13 @@ import { totalCount } from '@/store/cart'
   position: relative;
   padding: 4px 0;
   transition: color 0.2s;
+  text-decoration: none;
 }
 .links a:hover {
   color: var(--text-1);
 }
 .links a.active {
-  color: var(--gold-bright);
+  color: #3b82f6;
 }
 .links a.active::after {
   content: "";
@@ -117,7 +127,7 @@ import { totalCount } from '@/store/cart'
   bottom: -4px;
   height: 2px;
   border-radius: 2px;
-  background: linear-gradient(90deg, var(--gold-bright), var(--gold));
+  background: #3b82f6;
 }
 .actions {
   display: flex;
@@ -131,7 +141,7 @@ import { totalCount } from '@/store/cart'
   transition: color 0.2s;
 }
 .icon-btn:hover {
-  color: var(--gold);
+  color: #3b82f6;
 }
 .badge {
   position: absolute;
@@ -141,7 +151,7 @@ import { totalCount } from '@/store/cart'
   height: 17px;
   padding: 0 4px;
   border-radius: 9px;
-  background: var(--accent);
+  background: #3b82f6;
   color: #fff;
   font-size: 11px;
   line-height: 17px;
@@ -150,6 +160,27 @@ import { totalCount } from '@/store/cart'
 .btn-ghost.sm {
   padding: 8px 16px;
   font-size: 14px;
+  color: #3b82f6;
+  text-decoration: none;
+  border: 1px solid #3b82f6;
+  border-radius: 20px;
+}
+.avatar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e2e8f0;
+  color: var(--text-1);
+  text-decoration: none;
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 @media (max-width: 640px) {
@@ -158,10 +189,6 @@ import { totalCount } from '@/store/cart'
   }
   .bar {
     height: 56px;
-  }
-  .logo {
-    height: 32px;
-    width: 32px;
   }
 }
 </style>

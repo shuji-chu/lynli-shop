@@ -1,13 +1,9 @@
 <template>
-  <!-- 纯代码生成的动态曲线背景 -->
+  <!-- 核心背景容器 -->
   <div class="login-wrapper">
     
-    <!-- 🎨 底层：模拟女性曼妙曲线的流动光影（纯CSS，0秒加载） -->
-    <div class="dynamic-curves">
-      <div class="curve waist-curve"></div>
-      <div class="curve hip-curve"></div>
-      <div class="light-glow"></div>
-    </div>
+    <!-- 🎨 极薄的高级遮罩（防止背景太亮看不清字） -->
+    <div class="bg-overlay"></div>
     
     <!-- 登录卡片 -->
     <div class="login-card">
@@ -221,7 +217,7 @@ const submit = async () => {
 </script>
 
 <style scoped>
-/* 整体背景：高端蓝白渐变 */
+/* 登录页外层：使用高级蓝调人体轮廓直链图 */
 .login-wrapper {
   position: relative;
   min-height: 100vh;
@@ -229,83 +225,32 @@ const submit = async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e0f2fe 0%, #f8fafc 100%);
+  /* 这里是一张极高质量的蓝调女性背部曲线图 */
+  background-image: url('https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   overflow: hidden;
 }
 
-/* 动态曲线容器 */
-.dynamic-curves {
+/* 🎨 极薄的蓝黑渐变遮罩：能看清人，也能看清字 */
+.bg-overlay {
   position: absolute;
   inset: 0;
+  background: linear-gradient(135deg, rgba(224, 242, 254, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%);
   z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
 }
 
-/* 核心曲线光效 */
-.curve {
-  position: absolute;
-  filter: blur(60px);
-  opacity: 0.7;
-}
-
-/* 模拟女性腰部的优美曲线 */
-.waist-curve {
-  width: 800px;
-  height: 600px;
-  background: linear-gradient(120deg, #93c5fd 0%, #3b82f6 100%);
-  top: -10%;
-  left: -20%;
-  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-  animation: dance 8s infinite alternate ease-in-out;
-}
-
-/* 模拟女性胯部/腿部的圆润曲线 */
-.hip-curve {
-  width: 700px;
-  height: 800px;
-  background: linear-gradient(300deg, #bfdbfe 0%, #1e3a8a 100%);
-  bottom: -20%;
-  right: -10%;
-  border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%;
-  animation: dance 10s infinite alternate-reverse ease-in-out;
-}
-
-/* 呼吸感的高光点 */
-.light-glow {
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  background: #ffffff;
-  border-radius: 50%;
-  filter: blur(80px);
-  top: 20%;
-  left: 30%;
-  opacity: 0.6;
-  animation: float 6s infinite alternate ease-in-out;
-}
-
-/* 登录卡片：高级毛玻璃 */
+/* 登录卡片：高级毛玻璃，悬浮在人物前面 */
 .login-card {
   width: 90%;
   max-width: 380px;
-  background: rgba(255, 255, 255, 0.85); 
+  background: rgba(255, 255, 255, 0.88); 
   backdrop-filter: blur(20px); 
   padding: 40px 30px 30px;
   border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(30, 58, 138, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   z-index: 10;
-  border: 1px solid rgba(255,255,255,0.9);
-}
-
-/* 动画：呼吸与舞动 */
-@keyframes dance {
-  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-  100% { transform: translate(30px, 20px) scale(1.1) rotate(10deg); }
-}
-
-@keyframes float {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(30px); }
+  border: 1px solid rgba(255,255,255,0.4);
 }
 </style>

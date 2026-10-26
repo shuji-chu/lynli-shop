@@ -104,6 +104,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'HomeView' });
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import ProductCard from '@/components/ProductCard.vue'
 import { getProducts } from '@/api/product'

@@ -1,5 +1,10 @@
 <template>
   <div class="container home">
+    <!-- 🚨 报错看这里，直接显示在页面上，不弹窗 -->
+    <div v-if="errorMsg" style="background: #fee2e2; color: #ef4444; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-weight: bold; word-break: break-all;">
+      错误原因：{{ errorMsg }}
+    </div>
+
     <section class="hero">
       <h1 class="gold-text">探索边界 · 私人愉悦</h1>
       <p>高端情趣用品甄选 · 私密发货 · 全球好物直达</p>
@@ -28,10 +33,13 @@ const products = ref([])
 const loading = ref(false)
 const page = ref(1)
 const hasMore = ref(true)
+const errorMsg = ref('') // 用来存报错信息
 
 async function loadData() {
   if (loading.value) return
   loading.value = true
+  errorMsg.value = ''
+  
   try {
     const res = await getProducts({ page: page.value, size: 20 })
     const list = Array.isArray(res) ? res : (res?.data || [])
@@ -40,7 +48,15 @@ async function loadData() {
     if (page.value === 1) products.value = list
     else products.value.push(...list)
   } catch (e) {
-    console.warn('加载失败', e); loadError.value = true;
+    console.error('加载失败详情:', e)
+    // 强行把报错信息显示在页面上
+    if (e.response) {
+      errorMsg.value = '接口报错 HTTP ' + e.response.status
+    } else if (e.request) {
+      errorMsg.value = '网络拦截 (CORS或超时): ' + e.message
+    } else {
+      errorMsg.value = '请求配置错误: ' + e.message
+    }
   } finally {
     loading.value = false
   }
@@ -56,6 +72,7 @@ onMounted(loadData)
 </script>
 
 <style scoped>
+/* 样式保持不变 */
 .home { padding-top: 70px; padding-bottom: 20px; }
 .hero { text-align: center; padding: 30px 0 20px; }
 .hero h1 { font-size: 28px; font-weight: 800; color: #1e3a8a; }

@@ -1,13 +1,14 @@
 <template>
   <div class="page-wrap">
+    <!-- 唯一的标准返回头部 -->
     <div class="header">
-      <button @click="$router.back()">←</button>
-      <button class="back-btn" @click="$router.back()" style="background:none;border:none;font-size:24px;color:#1e293b;cursor:pointer;">←</button><h2>API 开放平台</h2>
-      <div></div>
+      <button class="back-btn" @click="$router.back()">←</button>
+      <h2>API 开放平台</h2>
+      <div style="width: 24px;"></div>
     </div>
 
     <div class="content">
-      <!-- 凭证卡片 -->
+      <!-- 开发者凭证 -->
       <div class="section-title">开发者凭证</div>
       <div class="card cred-card">
         <div class="cred-item">
@@ -176,11 +177,12 @@ const runTest = async () => {
 </script>
 
 <style scoped>
-/* 保持原有的浅色卡片风格 */
-.page-wrap {  min-height: 100vh; background: #f5f7fa; }
-.header { height: 56px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid #f1f5f9; }
-.header button { background: none; border: none; font-size: 24px; }
-.header h2 { font-size: 18px; margin: 0; }
+/* 标准的头部样式，绝不多出其他玩意儿 */
+.page-wrap { min-height: 100vh; background: #f8fafc; }
+.header { height: 56px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; z-index: 100; }
+.back-btn { background: none; border: none; font-size: 24px; color: #1e293b; cursor: pointer; padding: 0; }
+.header h2 { font-size: 18px; margin: 0; font-weight: bold; color: #1e293b; }
+
 .content { padding: 16px; }
 .section-title { font-size: 14px; color: #64748b; font-weight: bold; margin: 20px 0 10px 4px; }
 

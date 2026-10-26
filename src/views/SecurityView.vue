@@ -67,6 +67,7 @@ const userInfo = computed(() => {
 })
 
 const myAvatar = computed(() => userInfo.value.avatar || 'https://api.dicebear.com/7.x/initials/svg?seed=lynli&backgroundColor=3b82f6&textColor=ffffff')
+const myShortId = computed(() => userInfo.value.short_id || "10001")
 const myNickname = computed(() => userInfo.value.nickname || '未设置')
 const myEmail = computed(() => userInfo.value.email || '未绑定')
 

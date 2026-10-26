@@ -10,7 +10,10 @@
         
         <router-link v-if="hasToken" to="/orders" class="profile-box">
           <img :src="myAvatar" alt="头像" class="avatar-img" />
-          <span class="nickname">{{ myNickname }}</span>
+          <div class="user-info">
+            <span class="nickname">{{ myNickname }}</span>
+            <span class="short-id">ID: {{ myShortId }}</span>
+          </div>
         </router-link>
         
         <router-link v-else to="/auth" class="btn-ghost sm">去登录</router-link>
@@ -36,6 +39,7 @@ const myAvatar = computed(() => {
 })
 
 const myNickname = computed(() => myInfo.value.nickname || myInfo.value.email?.split('@')[0] || '用户')
+const myShortId = computed(() => myInfo.value.short_id || '10001')
 </script>
 
 <style scoped>
@@ -45,9 +49,14 @@ const myNickname = computed(() => myInfo.value.nickname || myInfo.value.email?.s
 .brand-text i { font-size: 14px; color: #3b82f6; margin-left: 4px; }
 .actions { display: flex; align-items: center; gap: 16px; }
 .icon-btn { color: #333; text-decoration: none; font-size: 14px; }
-.profile-box { display: flex; align-items: center; gap: 8px; text-decoration: none; background: #f1f5f9; padding: 4px 12px 4px 4px; border-radius: 20px; transition: background 0.2s; }
+.profile-box { display: flex; align-items: center; gap: 8px; text-decoration: none; background: #f1f5f9; padding: 4px 12px 4px 4px; border-radius: 24px; transition: background 0.2s; }
 .profile-box:hover { background: #e2e8f0; }
 .avatar-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: white; }
-.nickname { font-size: 14px; font-weight: bold; color: #1e293b; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 给ID和昵称排版 */
+.user-info { display: flex; flex-direction: column; justify-content: center; line-height: 1.2; }
+.nickname { font-size: 13px; font-weight: bold; color: #1e293b; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.short-id { font-size: 10px; color: #94a3b8; font-family: monospace; }
+
 .btn-ghost.sm { color: #3b82f6; border: 1px solid #3b82f6; padding: 6px 16px; border-radius: 20px; text-decoration: none; font-size: 14px; }
 </style>

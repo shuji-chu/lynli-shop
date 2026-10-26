@@ -5,6 +5,8 @@
         <img :src="myAvatar" class="p-avatar" />
         <div class="p-info">
           <h3 class="p-name">{{ myNickname }}</h3>
+          <!-- 🚨 核心修改：ID 直接怼在名字下面 -->
+          <p class="p-id">专属ID: {{ userInfo.short_id || '10001' }}</p>
           <p class="p-role" v-if="userInfo.role === 'super' || userInfo.role === 'admin'">尊贵的管理员</p>
         </div>
         <div class="settings-icon" @click="$router.push('/settings')">
@@ -24,7 +26,6 @@
         <span class="all-orders" @click="$router.push('/order-list?tab=all')">全部订单 &gt;</span>
       </div>
       <div class="order-nav">
-        <!-- 注意：这里的 tab 参数直接传后端数据库的 status 值 -->
         <div class="nav-item" @click="$router.push('/order-list?tab=0')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg><span>待付款</span>
         </div>
@@ -81,8 +82,9 @@ onMounted(load)
 .profile-card { position: relative; background: linear-gradient(135deg, #3b82f6, #1e3a8a); border-radius: 20px; padding: 24px; color: #fff; box-shadow: 0 10px 20px rgba(59,130,246,0.2); margin-bottom: 16px; }
 .p-top { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
 .p-avatar { width: 68px; height: 68px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); object-fit: cover; }
-.p-info { display: flex; flex-direction: column; gap: 6px; }
-.p-name { font-size: 22px; font-weight: bold; margin: 0; }
+.p-info { display: flex; flex-direction: column; gap: 4px; }
+.p-name { font-size: 20px; font-weight: bold; margin: 0; }
+.p-id { font-size: 12px; color: rgba(255,255,255,0.8); margin: 0; font-family: monospace; letter-spacing: 1px; }
 .p-role { font-size: 12px; background: rgba(255,255,255,0.2); display: inline-block; padding: 3px 10px; border-radius: 12px; margin: 0; width: fit-content; }
 .settings-icon { position: absolute; top: 24px; right: 20px; cursor: pointer; opacity: 0.8; }
 .settings-icon svg { width: 20px; height: 20px; }

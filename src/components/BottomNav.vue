@@ -49,7 +49,7 @@ import { totalCount } from '@/store/cart'
     align-items: center;
     height: 58px;
     padding-bottom: env(safe-area-inset-bottom);
-    background: rgba(8, 8, 13, 0.82);
+    background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     border-top: 1px solid var(--border);
@@ -64,7 +64,7 @@ import { totalCount } from '@/store/cart'
     transition: color 0.2s;
   }
   .tab.active {
-    color: var(--gold-bright);
+    color: var(--accent);
   }
   .rel {
     position: relative;
@@ -78,7 +78,7 @@ import { totalCount } from '@/store/cart'
     height: 16px;
     padding: 0 4px;
     border-radius: 8px;
-    background: var(--danger);
+    background: var(--accent);
     color: #fff;
     font-size: 10px;
     line-height: 16px;

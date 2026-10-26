@@ -24,7 +24,7 @@
       <SkeletonCard v-for="n in 8" :key="n" />
     </div>
     <div v-else-if="loadError" class="state-box">
-      <p class="state-icon">🛰️</p>
+      <p class="state-icon" style="font-size:40px;margin-bottom:10px;">🔒</p>
       <p class="state-title">商品加载失败</p>
       <p class="state-desc">
         可能是网络波动或接口跨域被拦截，请检查网络后重试。
@@ -32,7 +32,7 @@
       <button class="btn-gold" @click="load">重新加载</button>
     </div>
     <div v-else-if="!filtered.length" class="state-box">
-      <p class="state-icon"></p>
+      
       <p class="state-title">暂无商品</p>
       <p class="state-desc">管理端尚未铺货，请稍后再来～</p>
     </div>

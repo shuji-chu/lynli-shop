@@ -1,172 +1,208 @@
 <template>
-  <div class="container auth">
-    <div class="card panel">
-      <h2 class="title gold-text">LYNLI 泠礼</h2>
-      <p class="sub">邮箱验证码快捷登录 / 注册</p>
+  <div class="auth-page">
+    <div class="auth-card">
+      <h2 class="title">LYNLI <span>泠礼</span></h2>
+      
+      <!-- 核心切换 Tab -->
+      <div class="tabs">
+        <div class="tab" :class="{ active: mode === 'login' }" @click="switchMode('login')">登录</div>
+        <div class="tab" :class="{ active: mode === 'register' }" @click="switchMode('register')">注册</div>
+      </div>
 
       <form @submit.prevent="onSubmit" class="form">
-        <input
-          v-model.trim="form.email"
-          class="field"
-          type="email"
-          placeholder="请输入邮箱"
-          autocomplete="email"
-        />
-        <div class="code-row">
-          <input
-            v-model.trim="form.code"
-            class="field"
-            placeholder="邮箱验证码"
-            inputmode="numeric"
-          />
-          <button type="button" class="btn-ghost sm" :disabled="sending || countdown > 0" @click="onSend">
-            {{ countdown > 0 ? countdown + 's' : '获取验证码' }}
+        <input v-model="form.email" type="email" placeholder="请输入邮箱" class="field" required />
+        
+        <!-- 只有注册和找回密码才需要验证码 -->
+        <div class="code-row" v-if="mode !== 'login'">
+          <input v-model="form.code" type="text" placeholder="邮箱验证码" class="field" required />
+          <button type="button" class="btn-code" :disabled="counting" @click="onSend">
+            {{ counting ? countdown + 's' : '获取验证码' }}
           </button>
         </div>
 
-        <button type="submit" class="btn-gold" :disabled="submitting">
-          {{ submitting ? '处理中...' : '立即登录 / 注册' }}
+        <input v-model="form.password" type="password" placeholder="请输入密码" class="field" required />
+        
+        <!-- 只有注册和找回密码才需要确认密码 -->
+        <input v-if="mode !== 'login'" v-model="form.confirmPassword" type="password" placeholder="请确认密码" class="field" required />
+
+        <button type="submit" class="btn-submit" :disabled="loading">
+          {{ loading ? '处理中...' : (mode === 'login' ? '立即登录' : (mode === 'register' ? '注册新账户' : '重置密码')) }}
         </button>
       </form>
 
-      <p class="tip">登录即表示同意《用户协议》与《隐私政策》</p>
+      <div class="footer-links">
+        <span v-if="mode === 'login'" @click="switchMode('reset')">忘记密码？</span>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onBeforeUnmount } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { sendCode, login, register } from '@/api/auth'
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+// 这里假设你的 api 里有这些方法，如果没有请让后端智能体补全
+import { sendCode, login, register, resetPassword } from '@/api/auth' 
 import { setSession } from '@/store/user'
 import { Toast } from '@/utils/toast'
 
-const route = useRoute()
 const router = useRouter()
-const form = reactive({ email: '', code: '' })
-const sending = ref(false)
-const submitting = ref(false)
-const countdown = ref(0)
+const mode = ref('login') // login, register, reset
+const form = reactive({ email: '', password: '', confirmPassword: '', code: '' })
+const loading = ref(false)
+const counting = ref(false)
+const countdown = ref(60)
 let timer = null
 
-const emailValid = computed(() => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email))
-
-function startCountdown() {
-  clearInterval(timer)
-  countdown.value = 60
-  timer = setInterval(() => {
-    countdown.value -= 1
-    if (countdown.value <= 0) clearInterval(timer)
-  }, 1000)
+function switchMode(newMode) {
+  mode.value = newMode
+  form.code = ''
+  form.password = ''
+  form.confirmPassword = ''
 }
 
 async function onSend() {
-  if (!emailValid.value) {
-    Toast.error('请输入正确的邮箱地址')
-    return
-  }
-  sending.value = true
+  if (!form.email) return Toast.error('请先输入邮箱')
+  counting.value = true
   try {
-    await sendCode(form.email)
-    Toast.success('验证码已发送，请查收邮箱')
-    startCountdown()
-  } catch {
-  } finally {
-    sending.value = false
+    await sendCode(form.email, mode.value) // 传 type 给后端区分场景
+    Toast.success('验证码已发送')
+    countdown.value = 60
+    timer = setInterval(() => {
+      countdown.value--
+      if (countdown.value <= 0) {
+        clearInterval(timer)
+        counting.value = false
+      }
+    }, 1000)
+  } catch (e) {
+    counting.value = false
   }
 }
 
 async function onSubmit() {
-  if (!emailValid.value) {
-    Toast.error('请输入正确的邮箱地址')
-    return
+  if (mode.value !== 'login' && form.password !== form.confirmPassword) {
+    return Toast.error('两次输入的密码不一致')
   }
-  if (!form.code) {
-    Toast.error('请输入验证码')
-    return
-  }
-  submitting.value = true
+  
+  loading.value = true
   try {
-    // 逻辑合并：先尝试登录，如果失败（未注册），则自动注册
     let res
-    try {
-      res = await login({ email: form.email, code: form.code })
-    } catch (e) {
-      // 如果后端返回未注册，则去注册
-      res = await register({ email: form.email, code: form.code })
-    }
-    
-    const token = res?.token || res?.access_token
-    if (!token) {
-      Toast.error('操作失败：未返回登录凭证')
+    if (mode.value === 'login') {
+      res = await login({ email: form.email, password: form.password })
+    } else if (mode.value === 'register') {
+      res = await register({ email: form.email, password: form.password, code: form.code })
+    } else {
+      res = await resetPassword({ email: form.email, password: form.password, code: form.code })
+      Toast.success('密码重置成功，请登录')
+      switchMode('login')
       return
     }
-    const info = res?.user || res?.info || { email: form.email }
-    setSession(token, info)
-    Toast.success('操作成功')
-    const redirect = route.query.redirect || '/'
-    router.replace(redirect)
-  } catch {
+    
+    // 登录成功
+    const token = res?.token || res?.access_token
+    if (token) {
+      setSession(token, res.user || { email: form.email })
+      Toast.success('欢迎回来')
+      router.replace('/')
+    }
+  } catch (e) {
+    // 拦截器已提示
   } finally {
-    submitting.value = false
+    loading.value = false
   }
 }
-
-onBeforeUnmount(() => clearInterval(timer))
 </script>
 
 <style scoped>
-.auth {
+.auth-page {
+  min-height: 100vh;
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding-top: 40px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #f3f4f6 100%);
+  padding: 20px;
 }
-.card {
+.auth-card {
   width: 100%;
   max-width: 400px;
-  padding: 32px 26px;
-  text-align: center;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 40px 30px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
 }
 .title {
-  font-size: 30px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: #3b82f6;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 900;
+  color: #1e3a8a;
+  margin-bottom: 30px;
 }
-.sub {
-  margin-top: 8px;
-  font-size: 13px;
-  color: var(--text-2);
+.title span { color: #3b82f6; font-size: 22px; }
+.tabs {
+  display: flex;
+  margin-bottom: 30px;
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 4px;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 15px;
+  font-weight: bold;
+  color: #64748b;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab.active {
+  background: #fff;
+  color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 .form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 24px;
+  gap: 16px;
 }
-.code-row {
-  display: flex;
-  gap: 10px;
+.field {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 15px;
+  outline: none;
+  background: #fff;
 }
-.code-row .field {
-  flex: 1;
-}
-.btn-ghost.sm {
-  padding: 0 14px;
-  font-size: 13px;
+.field:focus { border-color: #3b82f6; }
+.code-row { display: flex; gap: 10px; }
+.btn-code {
+  background: #eff6ff;
+  color: #3b82f6;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-size: 14px;
   white-space: nowrap;
 }
-.btn-gold {
-  margin-top: 6px;
-  padding: 14px;
+.btn-submit {
   background: #3b82f6;
-  color: white;
-  border-radius: 12px;
+  color: #fff;
   border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 10px;
+  cursor: pointer;
 }
-.tip {
-  margin-top: 18px;
-  font-size: 12px;
-  color: var(--text-3);
+.footer-links {
+  margin-top: 20px;
+  text-align: right;
+  font-size: 13px;
+  color: #64748b;
 }
+.footer-links span { cursor: pointer; }
 </style>

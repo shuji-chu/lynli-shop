@@ -1,6 +1,6 @@
 <template>
   <div class="page-wrap">
-    <div class="header"><button @click="$router.back()">←</button><h2>{{ title }}</h2><div></div></div>
+    <div class="header"><button @click="$router.back()">←</button><button class="back-btn" @click="$router.back()" style="background:none;border:none;font-size:24px;color:#1e293b;cursor:pointer;">←</button><h2>{{ title }}</h2><div></div></div>
     <div class="content">
       <div class="form-card">
         <input v-model="form.name" placeholder="您的称呼 / 公司名称" />

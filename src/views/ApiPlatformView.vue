@@ -2,7 +2,7 @@
   <div class="page-wrap">
     <div class="header">
       <button @click="$router.back()">←</button>
-      <h2>API 开放平台</h2>
+      <button class="back-btn" @click="$router.back()" style="background:none;border:none;font-size:24px;color:#1e293b;cursor:pointer;">←</button><h2>API 开放平台</h2>
       <div></div>
     </div>
 

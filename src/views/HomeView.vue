@@ -1,9 +1,47 @@
 <template>
   <div class="container home">
-    <!-- 🎨 丰满柔美的透明背景光影 -->
-    <div class="bg-glow bg-1"></div>
-    <div class="bg-glow bg-2"></div>
-    <div class="bg-glow bg-3"></div>
+    <!-- 🚀 太空背景层 -->
+    <div class="space-bg">
+      <!-- 膨胀的星云光晕（体现视觉丰满） -->
+      <div class="nebula nebula-pink"></div>
+      <div class="nebula nebula-blue"></div>
+      
+      <!-- 漂浮的胖宇航员（SVG纯代码绘制） -->
+      <div class="astronaut-wrap">
+        <svg class="astronaut" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="visor" cx="40%" cy="30%" r="60%">
+              <stop offset="0%" stop-color="#7dd3fc" stop-opacity="0.8"/>
+              <stop offset="100%" stop-color="#1e3a8a" stop-opacity="0.9"/>
+            </radialGradient>
+            <linearGradient id="suit" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#f8fafc"/>
+              <stop offset="100%" stop-color="#cbd5e1"/>
+            </linearGradient>
+          </defs>
+          <!-- 胖胖的身体 -->
+          <rect x="50" y="90" width="100" height="90" rx="40" fill="url(#suit)" />
+          <circle cx="100" cy="90" r="50" fill="url(#suit)" />
+          <!-- 头盔面罩 -->
+          <circle cx="100" cy="80" r="40" fill="#e2e8f0" />
+          <circle cx="100" cy="80" r="34" fill="url(#visor)" />
+          <!-- 面罩高光 -->
+          <ellipse cx="85" cy="65" rx="15" ry="8" fill="rgba(255,255,255,0.4)" transform="rotate(-30 85 65)" />
+          <!-- 小背包 -->
+          <rect x="35" y="110" width="20" height="50" rx="10" fill="#94a3b8" />
+          <!-- 小短手和小短腿 -->
+          <circle cx="45" cy="140" r="15" fill="url(#suit)" />
+          <circle cx="155" cy="140" r="15" fill="url(#suit)" />
+          <rect x="65" y="170" width="20" height="25" rx="10" fill="url(#suit)" />
+          <rect x="115" y="170" width="20" height="25" rx="10" fill="url(#suit)" />
+          <!-- 氧气管 -->
+          <path d="M 50 110 Q 20 130 45 140" stroke="#64748b" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- 闪烁的星星 -->
+      <div class="stars"></div>
+    </div>
 
     <section class="hero">
       <h1 class="gold-text">探索边界 · 私人愉悦</h1>
@@ -38,11 +76,6 @@
       </div>
     </div>
 
-    <!-- 错误提示区 -->
-    <div v-if="errorMsg" style="background: #fee2e2; color: #ef4444; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-weight: bold;">
-      错误原因：{{ errorMsg }}
-    </div>
-
     <!-- 商品列表 -->
     <div class="grid" v-if="filteredList.length">
       <ProductCard v-for="p in filteredList" :key="p.id" :product="p" />
@@ -68,17 +101,14 @@ const products = ref([])
 const loading = ref(false)
 const page = ref(1)
 const hasMore = ref(true)
-const errorMsg = ref('')
 const keyword = ref('')
 
-// 🔥 搜索历史逻辑
 const showHistory = ref(false)
 const historyList = ref(JSON.parse(localStorage.getItem('lynli_search_history') || '[]'))
 
 function handleSearch() {
   if (!keyword.value.trim()) return
   const kw = keyword.value.trim()
-  // 去重并限制最多10条
   historyList.value = [kw, ...historyList.value.filter(i => i !== kw)].slice(0, 10)
   localStorage.setItem('lynli_search_history', JSON.stringify(historyList.value))
   showHistory.value = false
@@ -94,7 +124,6 @@ function clearHistory() {
   localStorage.removeItem('lynli_search_history')
 }
 
-// 前端本地搜索过滤
 const filteredList = computed(() => {
   if (!keyword.value.trim()) return products.value
   const kw = keyword.value.toLowerCase().trim()
@@ -108,17 +137,14 @@ const filteredList = computed(() => {
 async function loadData() {
   if (loading.value) return
   loading.value = true
-  errorMsg.value = ''
-  
   try {
     const res = await getProducts({ page: page.value, size: 20 })
     const list = Array.isArray(res) ? res : (res?.data || [])
-    
     if (list.length < 20) hasMore.value = false
     if (page.value === 1) products.value = list
     else products.value.push(...list)
   } catch (e) {
-    errorMsg.value = '接口报错，请稍后再试'
+    console.warn(e)
   } finally {
     loading.value = false
   }
@@ -134,34 +160,98 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-/* 基础容器 */
-.home { padding-top: 70px; padding-bottom: 20px; min-height: 100vh; background: #f8fafc; position: relative; overflow: hidden; }
-.hero { text-align: center; padding: 20px 0; position: relative; z-index: 2; }
-.hero h1 { font-size: 26px; font-weight: 800; color: #1e3a8a; margin: 0; }
-.hero p { margin-top: 8px; font-size: 13px; color: #64748b; }
+/* 核心容器：深邃太空背景 */
+.home { 
+  padding-top: 70px; 
+  padding-bottom: 20px; 
+  min-height: 100vh; 
+  background: #0f172a; /* 深空蓝底色 */
+  position: relative; 
+  overflow: hidden; 
+  color: #f8fafc;
+}
 
-/* 🎨 丰满柔美的背景光斑 */
-.bg-glow { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.4; z-index: 1; pointer-events: none; }
-.bg-1 { width: 300px; height: 400px; background: linear-gradient(135deg, #fbcfe8, #f472b6); top: -50px; right: -50px; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: float 8s infinite alternate; }
-.bg-2 { width: 250px; height: 350px; background: linear-gradient(135deg, #bfdbfe, #3b82f6); top: 300px; left: -80px; border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; animation: float 10s infinite alternate-reverse; }
-.bg-3 { width: 200px; height: 300px; background: linear-gradient(135deg, #e9d5ff, #a855f7); top: 600px; right: -50px; border-radius: 50% 50% 40% 60% / 60% 40% 50% 50%; animation: float 12s infinite alternate; }
-@keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-20px, 20px) scale(1.1); } }
+/* 🚀 背景特效层 */
+.space-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 星云光晕（丰满感） */
+.nebula {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+}
+.nebula-pink {
+  width: 400px; height: 400px;
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  top: -100px; right: -100px;
+  animation: breathe 10s infinite alternate;
+}
+.nebula-blue {
+  width: 500px; height: 500px;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  bottom: -100px; left: -150px;
+  animation: breathe 12s infinite alternate-reverse;
+}
+@keyframes breathe {
+  0% { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(1.2); opacity: 0.7; }
+}
+
+/* 漂浮的胖宇航员 */
+.astronaut-wrap {
+  position: absolute;
+  top: 10%;
+  right: 10%;
+  width: 120px;
+  height: 120px;
+  animation: floatAstronaut 6s infinite ease-in-out alternate;
+}
+.astronaut { width: 100%; height: 100%; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3)); }
+@keyframes floatAstronaut {
+  0% { transform: translateY(0) rotate(-5deg); }
+  100% { transform: translateY(30px) rotate(10deg); }
+}
+
+/* 闪烁星空背景 */
+.stars {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(1.5px 1.5px at 20px 30px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 100px 150px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 200px 80px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 300px 200px, #fff, rgba(0,0,0,0));
+  background-size: 300px 300px;
+  opacity: 0.3;
+  animation: twinkle 4s infinite alternate;
+}
+@keyframes twinkle { 0% { opacity: 0.1; } 100% { opacity: 0.5; } }
+
+/* 文字区 */
+.hero { text-align: center; padding: 20px 0; position: relative; z-index: 2; }
+.hero h1 { font-size: 26px; font-weight: 800; color: #fff; margin: 0; text-shadow: 0 2px 10px rgba(59,130,246,0.5); }
+.hero p { margin-top: 8px; font-size: 13px; color: #94a3b8; }
 
 /* 搜索框 */
 .search-wrap { padding: 0 16px 20px; position: relative; z-index: 10; }
-.search-box { display: flex; align-items: center; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border-radius: 20px; padding: 10px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+.search-box { display: flex; align-items: center; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border-radius: 20px; padding: 10px 16px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 .search-box svg { width: 18px; height: 18px; margin-right: 10px; }
-.search-box input { flex: 1; border: none; outline: none; font-size: 15px; color: #1e293b; background: transparent; }
-.search-box input::placeholder { color: #94a3b8; }
+.search-box input { flex: 1; border: none; outline: none; font-size: 15px; color: #fff; background: transparent; }
+.search-box input::placeholder { color: #64748b; }
 .clear-btn { font-size: 20px; color: #94a3b8; cursor: pointer; padding: 0 5px; }
 
 /* 搜索历史 */
-.history-wrap { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 12px; padding: 15px; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
-.history-header { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 10px; }
-.clear-history { cursor: pointer; color: #94a3b8; }
+.history-wrap { background: rgba(30, 41, 59, 0.9); backdrop-filter: blur(15px); border-radius: 12px; padding: 15px; margin-top: 10px; border: 1px solid rgba(255,255,255,0.1); }
+.history-header { display: flex; justify-content: space-between; font-size: 13px; color: #94a3b8; margin-bottom: 10px; }
+.clear-history { cursor: pointer; color: #64748b; }
 .history-tags { display: flex; flex-wrap: wrap; gap: 10px; }
-.tag { background: #f1f5f9; color: #475569; font-size: 13px; padding: 5px 12px; border-radius: 15px; cursor: pointer; transition: background 0.2s; }
-.tag:hover { background: #e2e8f0; }
+.tag { background: rgba(255,255,255,0.1); color: #cbd5e1; font-size: 13px; padding: 5px 12px; border-radius: 15px; cursor: pointer; }
 
 /* 商品列表 */
 .grid { column-count: 2; column-gap: 12px; padding: 0 16px; position: relative; z-index: 2; }
@@ -169,11 +259,5 @@ onMounted(loadData)
 .loading-text { text-align: center; padding: 40px; color: #94a3b8; font-size: 14px; }
 .empty { text-align: center; padding: 80px 0; color: #94a3b8; }
 .load-more-wrap { text-align: center; padding: 20px 0 40px; position: relative; z-index: 2; }
-.load-more-btn { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; padding: 10px 30px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; }
-
-@media (min-width: 768px) {
-  .grid { column-count: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
-  .grid > * { margin-bottom: 0; }
-  .hero h1 { font-size: 34px; }
-}
+.load-more-btn { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.5); padding: 10px 30px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; }
 </style>

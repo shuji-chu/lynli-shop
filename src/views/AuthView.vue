@@ -1,18 +1,11 @@
 <template>
   <div class="container auth">
     <div class="card panel">
-      <router-link to="/" class="back">← 返回</router-link>
-      <h2 class="title gold-text">LYNLI 微澜</h2>
+      
+      <h2 class="title gold-text">LYNLI 泠礼</h2>
       <p class="sub">邮箱验证码登录 / 注册</p>
 
-      <div class="tabs">
-        <button :class="{ active: mode === 'login' }" @click="mode = 'login'">
-          登录
-        </button>
-        <button :class="{ active: mode === 'register' }" @click="mode = 'register'">
-          注册
-        </button>
-      </div>
+      
 
       <form @submit.prevent="onSubmit" class="form">
         <input
@@ -29,18 +22,7 @@
             placeholder="邮箱验证码"
             inputmode="numeric"
           />
-          <button
-            type="button"
-            class="btn-ghost sm"
-            :disabled="sending || countdown > 0"
-            @click="onSend"
-          >
-            {{ countdown > 0 ? countdown + 's' : '获取验证码' }}
-          </button>
-        </div>
-        <button class="btn-gold" type="submit" :disabled="submitting">
-          {{ submitting ? '处理中…' : mode === 'login' ? '登录' : '注册并登录' }}
-        </button>
+          <button class="btn-primary" style="width:100%;border-radius:20px;padding:15px;font-size:16px;font-weight:bold;background:#3b82f6;color:#fff;border:none;margin-top:20px;">立即登录 / 注册</button>
       </form>
 
       <p class="tip">登录即表示同意《用户协议》与《隐私政策》</p>

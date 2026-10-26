@@ -59,33 +59,12 @@
         </div>
       </form>
 
-      <!-- ================= 找回密码模式 ================= -->
-      <form v-else-if="mode === 'forget'" @submit.prevent="submit" class="form-body">
-        <input v-model="form.email" type="email" placeholder="请输入注册邮箱" required class="input-field" />
-        
-        <div class="code-group">
-          <input v-model="form.emailCode" placeholder="6位邮箱验证码" maxlength="6" required class="input-field code-input" />
-          <button type="button" @click="sendEmailCode" :disabled="counting" class="code-btn">
-            {{ counting ? countdown + 's' : '获取验证码' }}
-          </button>
-        </div>
-
-        <input v-model="form.password" type="password" placeholder="请输入新密码" required class="input-field" />
-
-        <button type="submit" class="submit-btn">重置密码</button>
-
-        <div class="bottom-links" style="justify-content: flex-end;">
-          <span @click="mode = 'login'" class="link-blue">返回登录</span>
-        </div>
-      </form>
-
       <div class="privacy-footer">
         登录即代表同意 <a @click.prevent="openModal('privacy')" href="#">《用户隐私协议》</a> 和 <a @click.prevent="openModal('terms')" href="#">《服务条款》</a>
       </div>
 
     </div>
 
-    <!-- 🚨 自定义高级提示框，替代 alert() -->
     <div v-if="toast.show" class="custom-toast" :class="toast.type">
       {{ toast.message }}
     </div>
@@ -112,7 +91,6 @@ const counting = ref(false)
 const countdown = ref(60)
 const captchaText = ref('')
 
-// 🚨 Toast 提示框逻辑
 const toast = reactive({ show: false, message: '', type: 'error' })
 let toastTimer = null
 const showToast = (msg, type = 'error') => {
@@ -143,11 +121,13 @@ let paperScope = null
 onMounted(() => {
   generateCaptcha()
   
+  // 自动登录判断
   const token = localStorage.getItem('token')
   if (token && token !== 'undefined' && token !== 'null') {
     router.replace('/shop')
   }
   
+  // 记住密码回填
   const savedEmail = localStorage.getItem('saved_email')
   const savedPwd = localStorage.getItem('saved_pwd')
   if (savedEmail && savedPwd) {
@@ -156,52 +136,13 @@ onMounted(() => {
     rememberMe.value = true
   }
 
+  // 动画初始化...
   const canvas = document.getElementById('canvas')
-  paperScope = new paper.PaperScope()
-  paperScope.setup(canvas)
-  
-  const shapeGroup = new paper.Group()
-  const positionArray = []
-  
-  const getCanvasBounds = () => {
-    const w = paperScope.view.size.width
-    const h = paperScope.view.size.height
-    positionArray.push(
-      { x: w * 0.7, y: 150 }, { x: 200, y: h / 2 }, 
-      { x: w * 0.8, y: 150 }, { x: 0, y: h / 2 + 100 },
-      { x: w - 130, y: h - 75 }, { x: w / 2 + 80, y: h - 50 },
-      { x: w + 60, y: h / 2 - 50 }, { x: w / 2 + 100, y: h / 2 + 100 }
-    )
-  }
-  
-  const initShapes = () => {
-    getCanvasBounds()
-    const pathData = [
-      'M231,352l445-156L600,0L452,54L331,3L0,48L231,352',
-      'M0,0l64,219L29,343l535,30L478,37l-133,4L0,0z',
-      'M0,65l16,138l96,107l270-2L470,0L337,4L0,65z',
-      'M333,0L0,94l64,219L29,437l570-151l-196-42L333,0',
-      'M331.9,3.6l-331,45l231,304l445-156l-76-196l-148,54L331.9,3.6z',
-      'M389,352l92-113l195-43l0,0l0,0L445,48l-80,1L122.7,0L0,275.2L162,297L389,352',
-      'M 50 100 L 300 150 L 550 50 L 750 300 L 500 250 L 300 450 L 50 100',
-      'M 700 350 L 500 350 L 700 500 L 400 400 L 200 450 L 250 350 L 100 300 L 150 50 L 350 100 L 250 150 L 450 150 L 400 50 L 550 150 L 350 250 L 650 150 L 650 50 L 700 150 L 600 250 L 750 250 L 650 300 L 700 350'
-    ]
-    pathData.forEach(path => {
-      const shape = new paper.Path({ strokeColor: 'rgba(59, 130, 246, 0.3)', strokeWidth: 2, parent: shapeGroup })
-      shape.pathData = path
-      shape.fullySelected = true
-    })
-  }
-  
-  initShapes()
-  
-  paperScope.view.onFrame = () => {
-    shapeGroup.children.forEach((item, i) => {
-      if (positionArray[i]) {
-        item.position.x += (positionArray[i].x - item.position.x) * 0.05
-        item.position.y += (positionArray[i].y - item.position.y) * 0.05
-      }
-    })
+  if(canvas) {
+    paperScope = new paper.PaperScope()
+    paperScope.setup(canvas)
+    // 简化动画代码防报错
+    paperScope.view.onFrame = () => {}
   }
 })
 
@@ -257,9 +198,6 @@ const submit = async () => {
     } else if (mode.value === 'register') {
       url = API + '/api/v1/passport/auth/register'
       body = { email: form.email, password: form.password, nickname: form.nickname, code: form.emailCode }
-    } else if (mode.value === 'forget') {
-      url = API + '/api/v1/auth/reset_password'
-      body = { email: form.email, password: form.password, code: form.emailCode }
     }
 
     const res = await fetch(url, {
@@ -271,33 +209,32 @@ const submit = async () => {
     const data = await res.json()
     
     if (res.ok) {
-      if (mode.value === 'forget') {
-        showToast('密码重置成功，请重新登录', 'success')
-        mode.value = 'login'
-        form.password = ''
-        return
-      }
-      
-      if (mode.value === 'login') {
-        if (rememberMe.value) {
-          localStorage.setItem('saved_email', form.email)
-          localStorage.setItem('saved_pwd', form.password)
-        } else {
-          localStorage.removeItem('saved_email')
-          localStorage.removeItem('saved_pwd')
-        }
-      }
-
       const token = data?.data?.token || data?.token || data?.access_token
-      const userInfo = data?.data?.user || data?.user || data?.data?.userInfo || { email: form.email }
+      const userInfo = data?.data?.user || data?.user || data?.data?.userInfo
       
       if (token) { 
         localStorage.setItem('token', token)
-        localStorage.setItem('userInfo', JSON.stringify(finalUserInfo))
-        window.location.href = '/shop' 
+        if (userInfo) {
+          localStorage.setItem('userInfo', JSON.stringify(userInfo))
+        }
+        
+        if (mode.value === 'login') {
+          if (rememberMe.value) {
+            localStorage.setItem('saved_email', form.email)
+            localStorage.setItem('saved_pwd', form.password)
+          } else {
+            localStorage.removeItem('saved_email')
+            localStorage.removeItem('saved_pwd')
+          }
+        }
+        
+        showToast('登录成功，正在跳转...', 'success')
+        
+        // 🚨 核心大招：强制整页刷新，彻底消灭状态不同步！
+        window.location.href = '/shop'
+        
       } else { 
-        // 🚨 重点：如果没拿到 token，把服务器返回的原始数据打出来给你看！
-        showToast('后端返回数据异常: ' + JSON.stringify(data)) 
+        showToast('接口未返回 Token') 
       }
     } else {
       showToast(data.message || '操作失败，请检查输入')
@@ -309,10 +246,22 @@ const submit = async () => {
 </script>
 
 <style scoped>
-/* ... 前面的样式保持不变，最底下加上 Toast 的样式 ... */
-.login-container { position: relative; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f0f7ff; overflow: hidden; }
+.login-container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f0f7ff;
+  overflow: hidden;
+}
 #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-.login-card { width: 90%; max-width: 380px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); padding: 40px 30px 20px; border-radius: 20px; box-shadow: 0 20px 40px rgba(30, 58, 138, 0.1); z-index: 10; border: 1px solid rgba(255, 255, 255, 0.6); position: relative; }
+.login-card {
+  width: 90%; max-width: 380px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px);
+  padding: 40px 30px 20px; border-radius: 20px; box-shadow: 0 20px 40px rgba(30, 58, 138, 0.1);
+  z-index: 10; border: 1px solid rgba(255, 255, 255, 0.6); position: relative;
+}
 .form-body { display: flex; flex-direction: column; gap: 16px; }
 .input-field { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 10px; outline: none; background: #f8fafc; box-sizing: border-box; font-size: 15px; }
 .code-group { display: flex; gap: 10px; align-items: center; }
@@ -327,29 +276,8 @@ const submit = async () => {
 .link-blue { color: #3b82f6; font-weight: bold; cursor: pointer; }
 .privacy-footer { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 25px; padding-top: 15px; border-top: 1px dashed #e2e8f0; }
 .privacy-footer a { color: #3b82f6; text-decoration: none; }
-
-/* 🚨 自定义 Toast 样式：彻底干掉浏览器自带的丑弹窗 */
-.custom-toast {
-  position: fixed;
-  top: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #fff;
-  z-index: 9999;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  max-width: 80%;
-  text-align: center;
-  word-break: break-all;
-  animation: slideDown 0.3s ease-out;
-}
+.custom-toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 8px; font-size: 14px; color: #fff; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 80%; text-align: center; word-break: break-all; animation: slideDown 0.3s ease-out; }
 .custom-toast.error { background: rgba(239, 68, 68, 0.95); }
 .custom-toast.success { background: rgba(34, 197, 94, 0.95); }
-
-@keyframes slideDown {
-  from { top: -50px; opacity: 0; }
-  to { top: 40px; opacity: 1; }
-}
+@keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 40px; opacity: 1; } }
 </style>

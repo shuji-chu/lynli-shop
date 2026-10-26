@@ -46,7 +46,7 @@ import { totalCount } from '@/store/cart'
   left: 0;
   right: 0;
   z-index: 100;
-  background: rgba(8, 8, 13, 0.55);
+  background: rgba(255, 255, 255, 0.62);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--border);
@@ -132,7 +132,7 @@ import { totalCount } from '@/store/cart'
   height: 17px;
   padding: 0 4px;
   border-radius: 9px;
-  background: var(--danger);
+  background: var(--accent);
   color: #fff;
   font-size: 11px;
   line-height: 17px;

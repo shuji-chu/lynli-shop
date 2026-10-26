@@ -18,7 +18,7 @@
         {{ product.desc || product.subtitle }}
       </p>
       <div class="bottom">
-        <span class="price">{{ formatPrice(product.price) }}</span>
+        <span class="price">{{ formatPrice(markupPrice(product.price)) }}</span>
         <span v-if="product.tag" class="tag">{{ product.tag }}</span>
       </div>
     </div>
@@ -29,6 +29,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { formatPrice } from '@/utils/format'
+import { markupPrice } from '@/utils/price'
 import { addToCart } from '@/store/cart'
 import { Toast } from '@/utils/toast'
 
@@ -71,7 +72,7 @@ function goDetail() {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(47, 107, 224, 0.05);
   overflow: hidden;
 }
 .img-wrap img {
@@ -97,9 +98,9 @@ function goDetail() {
   border-radius: 50%;
   font-size: 22px;
   line-height: 1;
-  color: #1a1206;
+  color: #fff;
   background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-  box-shadow: 0 6px 16px rgba(212, 175, 107, 0.4);
+  box-shadow: 0 6px 16px rgba(47, 107, 224, 0.32);
   transition: transform 0.2s;
 }
 .add:active {

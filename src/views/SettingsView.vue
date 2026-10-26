@@ -11,13 +11,12 @@
       <div class="section-title">账号与安全</div>
       <div class="section">
         <div class="item" @click="$router.push('/security')"><span>个人信息与安全</span><span class="val">查看 &gt;</span></div>
-        <div class="item" @click="$router.push('/pay-settings')"><span>支付设置</span><span class="val">支付宝/微信/海外 &gt;</span></div>
+        <div class="item" @click="$router.push('/pay-settings')"><span>支付设置</span><span class="val">支持的收款方式 &gt;</span></div>
       </div>
 
-      <!-- 2. 生态与拓展 -->
+      <!-- 2. 生态与拓展 (砍掉商家入驻，只留 API) -->
       <div class="section-title">生态与拓展</div>
       <div class="section">
-        <div class="item" @click="$router.push('/apply?type=merchant')"><span>商家入驻</span><span class="val">成为供应商 &gt;</span></div>
         <div class="item" @click="$router.push('/apply?type=api')"><span>API 开放平台</span><span class="val">自动化/开发者 &gt;</span></div>
       </div>
 
@@ -53,7 +52,6 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
-/* 样式完全保留你截图里的原样 */
 .settings-page { min-height: 100vh; background: #f5f7fa; padding-top: 60px; }
 .header { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 100; border-bottom: 1px solid #eee; }
 .header h2 { font-size: 18px; margin: 0; color: #1e293b; }

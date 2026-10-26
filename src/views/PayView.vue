@@ -46,6 +46,12 @@ async function init() {
     router.replace('/')
     return
   }
+  // 微信支付预留：尚未开通，不进入支付轮询
+  if (method.value === 'wechat') {
+    Toast.info('微信支付即将开通，敬请期待')
+    router.replace({ name: 'checkout' })
+    return
+  }
   try {
     const res = await payOrder({ trade_no: tradeNo.value, method: method.value })
     pay.value = res || {}
@@ -123,7 +129,7 @@ onBeforeUnmount(stopPoll)
   width: 42px;
   height: 42px;
   margin: 0 auto;
-  border: 3px solid rgba(212, 175, 107, 0.2);
+  border: 3px solid rgba(47, 107, 224, 0.18);
   border-top-color: var(--gold);
   border-radius: 50%;
   animation: spin 0.9s linear infinite;

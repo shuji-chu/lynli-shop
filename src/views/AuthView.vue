@@ -1,14 +1,13 @@
 <template>
-  <!-- 核心背景容器（内置蓝调女性剪影底图） -->
+  <!-- 纯代码生成的动态曲线背景 -->
   <div class="login-wrapper">
     
-    <!-- 🎬 在线动态女性剪影视频背景（盖在底图上方） -->
-    <video autoplay muted loop playsinline class="bg-video">
-      <source src="https://cdn.pixabay.com/video/2022/10/14/135090-760345192_large.mp4" type="video/mp4" />
-    </video>
-
-    <!-- 🎨 极薄的蓝白渐变遮罩（保证文字能看清，同时透出人物） -->
-    <div class="bg-overlay"></div>
+    <!-- 🎨 底层：模拟女性曼妙曲线的流动光影（纯CSS，0秒加载） -->
+    <div class="dynamic-curves">
+      <div class="curve waist-curve"></div>
+      <div class="curve hip-curve"></div>
+      <div class="light-glow"></div>
+    </div>
     
     <!-- 登录卡片 -->
     <div class="login-card">
@@ -222,7 +221,7 @@ const submit = async () => {
 </script>
 
 <style scoped>
-/* 登录页外层：加入了超稳的蓝调性感女性剪影底图 */
+/* 整体背景：高端蓝白渐变 */
 .login-wrapper {
   position: relative;
   min-height: 100vh;
@@ -230,34 +229,60 @@ const submit = async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* 背景图：Unsplash 高清蓝调女性剪影，永远不挂 */
-  background-image: url('https://images.unsplash.com/photo-1517436073-3b1b1b4b3b4b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
-  background-size: cover;
-  background-position: center;
+  background: linear-gradient(135deg, #e0f2fe 0%, #f8fafc 100%);
   overflow: hidden;
 }
 
-/* 🎬 视频背景样式 */
-.bg-video {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
-  transform: translate(-50%, -50%);
-  object-fit: cover;
-  z-index: 0;
-  opacity: 0.8; /* 透出底图 */
-}
-
-/* 🎨 极薄的蓝白遮罩层，只起氛围作用，不再遮挡画面 */
-.bg-overlay {
+/* 动态曲线容器 */
+.dynamic-curves {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(224, 242, 254, 0.2) 0%, rgba(30, 58, 138, 0.3) 100%);
   z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 核心曲线光效 */
+.curve {
+  position: absolute;
+  filter: blur(60px);
+  opacity: 0.7;
+}
+
+/* 模拟女性腰部的优美曲线 */
+.waist-curve {
+  width: 800px;
+  height: 600px;
+  background: linear-gradient(120deg, #93c5fd 0%, #3b82f6 100%);
+  top: -10%;
+  left: -20%;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  animation: dance 8s infinite alternate ease-in-out;
+}
+
+/* 模拟女性胯部/腿部的圆润曲线 */
+.hip-curve {
+  width: 700px;
+  height: 800px;
+  background: linear-gradient(300deg, #bfdbfe 0%, #1e3a8a 100%);
+  bottom: -20%;
+  right: -10%;
+  border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%;
+  animation: dance 10s infinite alternate-reverse ease-in-out;
+}
+
+/* 呼吸感的高光点 */
+.light-glow {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: #ffffff;
+  border-radius: 50%;
+  filter: blur(80px);
+  top: 20%;
+  left: 30%;
+  opacity: 0.6;
+  animation: float 6s infinite alternate ease-in-out;
 }
 
 /* 登录卡片：高级毛玻璃 */
@@ -268,8 +293,19 @@ const submit = async () => {
   backdrop-filter: blur(20px); 
   padding: 40px 30px 30px;
   border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(30, 58, 138, 0.2);
+  box-shadow: 0 20px 40px rgba(30, 58, 138, 0.1);
   z-index: 10;
   border: 1px solid rgba(255,255,255,0.9);
+}
+
+/* 动画：呼吸与舞动 */
+@keyframes dance {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  100% { transform: translate(30px, 20px) scale(1.1) rotate(10deg); }
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(30px); }
 }
 </style>

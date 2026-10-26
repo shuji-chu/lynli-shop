@@ -1,6 +1,6 @@
 <template>
   <div class="container orders-page">
-    <!-- 顶部：通栏渐变背景卡片 (消除左右留白) -->
+    <!-- 1. 顶部通栏个人信息卡片 -->
     <div class="profile-header">
       <div class="p-top">
         <img :src="myAvatar" class="p-avatar" />
@@ -16,7 +16,6 @@
         </div>
       </div>
       
-      <!-- 快捷入口 (增加点击区域，减少视觉破碎) -->
       <div class="p-links">
         <span @click="$router.push('/profile')">个人信息</span>
         <span @click="$router.push('/security')">账号与安全</span>
@@ -24,7 +23,7 @@
       </div>
     </div>
 
-    <!-- 中间：订单卡片 (去掉多余边距，贴近背景) -->
+    <!-- 2. 我的订单模块 -->
     <div class="section">
       <div class="section-header">
         <h3>我的订单</h3>
@@ -45,6 +44,49 @@
         </div>
         <div class="nav-item" @click="$router.push('/order-list?tab=refund')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span>退款/售后</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🚨 3. 新增：镶嵌在下面的功能菜单列表 -->
+    <div class="section menu-list">
+      <div class="menu-item" @click="$router.push('/address')">
+        <div class="m-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>收货地址</span>
+        </div>
+        <div class="m-right">
+          <span class="arrow">&gt;</span>
+        </div>
+      </div>
+
+      <div class="menu-item" @click="$router.push('/api-platform')">
+        <div class="m-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          <span>开发者 / 商户 API 平台</span>
+        </div>
+        <div class="m-right">
+          <span class="arrow">&gt;</span>
+        </div>
+      </div>
+
+      <div class="menu-item" @click="$router.push('/pay-settings')">
+        <div class="m-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+          <span>支持的支付方式</span>
+        </div>
+        <div class="m-right">
+          <span class="arrow">&gt;</span>
+        </div>
+      </div>
+
+      <div class="menu-item" @click="$router.push('/help')">
+        <div class="m-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>帮助与反馈</span>
+        </div>
+        <div class="m-right">
+          <span class="arrow">&gt;</span>
         </div>
       </div>
     </div>
@@ -86,7 +128,7 @@ onMounted(load)
 /* 页面底层底色 */
 .orders-page { background: #f5f7fa; min-height: 100vh; padding-bottom: 40px; }
 
-/* 🚨 彻底拉满顶部卡片，贴合顶部导航，不留缝隙 */
+/* 顶部通栏渐变卡片 */
 .profile-header { 
   background: linear-gradient(135deg, #3b82f6, #1e3a8a); 
   padding: 32px 20px 24px; 
@@ -96,7 +138,6 @@ onMounted(load)
   margin-bottom: 16px; 
   box-shadow: 0 8px 20px rgba(59,130,246,0.2); 
 }
-
 .p-top { display: flex; align-items: center; gap: 16px; position: relative; margin-bottom: 24px; }
 .p-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.9); object-fit: cover; background: #fff; }
 .p-info { display: flex; flex-direction: column; gap: 6px; }
@@ -107,20 +148,29 @@ onMounted(load)
 .settings-icon { position: absolute; top: 4px; right: 0; cursor: pointer; opacity: 0.9; }
 .settings-icon svg { width: 22px; height: 22px; }
 
-/* 底部链接 */
+/* 顶部链接 */
 .p-links { display: flex; justify-content: space-between; font-size: 14px; color: #fff; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15); }
 .p-links span { cursor: pointer; flex: 1; text-align: center; font-weight: 500; }
 .p-links span:first-child { text-align: left; }
 .p-links span:last-child { text-align: right; }
 
-/* 订单卡片：统一边距，不再飘忽 */
-.section { background: #fff; margin: 0 16px; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+/* 通用卡片 */
+.section { background: #fff; margin: 0 16px 16px; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .section-header h3 { margin: 0; font-size: 16px; color: #1e293b; font-weight: bold; }
 .all-orders { font-size: 13px; color: #94a3b8; cursor: pointer; }
 
+/* 订单导航 */
 .order-nav { display: flex; justify-content: space-between; }
-.nav-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; color: #475569; font-size: 13px; transition: color 0.2s; }
-.nav-item:hover { color: #3b82f6; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; color: #475569; font-size: 13px; }
 .nav-item svg { width: 28px; height: 28px; stroke-width: 1.8; }
+
+/* 🚨 新增：菜单列表样式 */
+.menu-list { padding: 0 20px; }
+.menu-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+.menu-item:last-child { border-bottom: none; }
+.m-left { display: flex; align-items: center; gap: 12px; font-size: 15px; color: #334155; font-weight: 500; }
+.m-left svg { width: 22px; height: 22px; }
+.m-right { display: flex; align-items: center; }
+.arrow { color: #cbd5e1; font-size: 14px; }
 </style>

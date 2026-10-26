@@ -40,7 +40,7 @@ async function loadData() {
     if (page.value === 1) products.value = list
     else products.value.push(...list)
   } catch (e) {
-    console.warn('加载失败', e)
+    console.error('接口报错详情:', e); alert('请求失败：' + (e.response?.data?.message || e.message || '网络异常'));
   } finally {
     loading.value = false
   }

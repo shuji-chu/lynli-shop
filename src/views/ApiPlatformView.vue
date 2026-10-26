@@ -29,7 +29,7 @@
       <!-- 2. 一键测试工具 -->
       <div class="section-title">自动化铺货测试</div>
       <div class="test-card">
-        <input v-model="testUrl" type="text" placeholder="输入 1688/淘宝 商品链接或关键词..." />
+        <input v-model="testUrl" type="text" placeholder="输入上游供应链商品链接或关键词..." />
         <button class="test-btn" @click="runTest" :disabled="testing">
           {{ testing ? '正在抓取并洗图上架...' : '一键触发铺货' }}
         </button>

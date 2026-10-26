@@ -1,9 +1,11 @@
 <template>
-  <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg,#e0f2fe,#f8fafc);">
+  <!-- 高级蓝白动态人物剪影背景 -->
+  <div class="login-wrapper">
+    <div class="bg-shape shape1"></div>
+    <div class="bg-shape shape2"></div>
     
-    <!-- 登录/注册卡片 -->
-    <div style="width: 90%; max-width: 380px; background: #fff; padding: 40px 30px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-      
+    <!-- 登录卡片 -->
+    <div class="login-card">
       <h2 style="text-align: center; font-size: 26px; font-weight: 900; color: #1e3a8a; margin-bottom: 20px;">LYNLI <span style="color: #3b82f6; font-size: 20px;">泠礼</span></h2>
       
       <!-- 顶部 Tab -->
@@ -15,7 +17,6 @@
       <h3 v-else style="text-align: center; color: #3b82f6; margin-bottom: 20px;">重置密码</h3>
 
       <form @submit.prevent="submit" style="display:flex;flex-direction:column;gap:16px;">
-        
         <input v-model="form.email" type="email" placeholder="请输入邮箱" required style="width:100%;padding:14px;border:1px solid #e2e8f0;border-radius:10px;outline:none; background:#f8fafc;" />
         
         <div v-if="mode !== 'login'" style="display: flex; gap: 10px;">
@@ -36,42 +37,61 @@
           </div>
         </div>
 
+        <!-- 记住密码 (仅在登录时显示) -->
+        <div v-if="mode === 'login'" style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #64748b;">
+          <input type="checkbox" v-model="rememberMe" id="remember" style="cursor: pointer;" />
+          <label for="remember" style="cursor: pointer;">记住密码</label>
+        </div>
+
         <button type="submit" style="background:#3b82f6;color:#fff;border:none;padding:15px;border-radius:10px;font-size:16px;font-weight:bold;margin-top:10px;">
           {{ mode === 'login' ? '立即登录' : mode === 'register' ? '注册并登录' : '重置密码' }}
         </button>
       </form>
 
-      <!-- 底部操作区：左边忘记密码，右边立即注册 -->
+      <!-- 底部操作区 -->
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; font-size:14px;">
-        <!-- 左边 -->
         <span v-if="mode === 'login'" @click="mode='forget'" style="cursor:pointer; color:#64748b;">忘记密码？</span>
         <span v-if="mode === 'forget'" @click="mode='login'" style="cursor:pointer; color:#3b82f6;">返回登录</span>
         
-        <!-- 右边 -->
         <span v-if="mode === 'login'" @click="mode='register'" style="cursor:pointer; color:#3b82f6; font-weight:bold;">还没有账号？立即注册</span>
         <span v-if="mode === 'register'" @click="mode='login'" style="cursor:pointer; color:#3b82f6; font-weight:bold;">已有账号？去登录</span>
       </div>
-
     </div>
 
-    <div style="margin-top: 30px; font-size: 12px; color: #94a3b8; text-align: center;">
-      登录即代表同意 <a href="#" style="color:#3b82f6; text-decoration:none;">《用户隐私协议》</a> 和 <a href="#" style="color:#3b82f6; text-decoration:none;">《服务条款》</a>
+    <!-- 底部隐私协议 -->
+    <div style="margin-top: 30px; font-size: 12px; color: #94a3b8; text-align: center; z-index: 10;">
+      登录即代表同意 
+      <a @click.prevent="openModal('privacy')" href="#" style="color:#3b82f6; text-decoration:none;">《用户隐私协议》</a> 和 
+      <a @click.prevent="openModal('terms')" href="#" style="color:#3b82f6; text-decoration:none;">《服务条款》</a>
     </div>
+
+    <!-- 引入弹窗组件 -->
+    <PrivacyModal :show="showModal" :type="modalType" @close="showModal = false" />
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import PrivacyModal from '@/components/PrivacyModal.vue' // 引入刚建的弹窗组件
 
 const router = useRouter()
 const mode = ref('login')
 const form = reactive({ email: '', password: '', rePassword: '', emailCode: '', captcha: '' })
+const rememberMe = ref(false)
 
 const API = 'https://api.lynli.me'
 const counting = ref(false)
 const countdown = ref(60)
 const captchaText = ref('')
+
+// 弹窗控制
+const showModal = ref(false)
+const modalType = ref('privacy')
+const openModal = (type) => {
+  modalType.value = type
+  showModal.value = true
+}
 
 const generateCaptcha = () => {
   const chars = 'ABCDEFGHJKMNPQRSTWXYZ23456789'
@@ -81,7 +101,24 @@ const generateCaptcha = () => {
   }
   captchaText.value = res
 }
-onMounted(() => generateCaptcha())
+
+onMounted(() => {
+  generateCaptcha()
+  // 自动识别：如果本地存了 token，直接踢去商城
+  const token = localStorage.getItem('token')
+  if (token && token !== 'undefined' && token !== 'null') {
+    router.replace('/shop')
+  }
+  
+  // 记住密码回填
+  const savedEmail = localStorage.getItem('saved_email')
+  const savedPwd = localStorage.getItem('saved_pwd')
+  if (savedEmail && savedPwd) {
+    form.email = savedEmail
+    form.password = savedPwd
+    rememberMe.value = true
+  }
+})
 
 const sendEmailCode = async () => {
   if (!form.email) return alert('请先输入邮箱')
@@ -149,9 +186,27 @@ const submit = async () => {
         return
       }
       
+      // 处理记住密码逻辑
+      if (mode.value === 'login') {
+        if (rememberMe.value) {
+          localStorage.setItem('saved_email', form.email)
+          localStorage.setItem('saved_pwd', form.password)
+        } else {
+          localStorage.removeItem('saved_email')
+          localStorage.removeItem('saved_pwd')
+        }
+      }
+
+      // 处理登录/注册成功的数据同步 (用户ID、昵称、头像)
       const token = data?.data?.token || data?.token || data?.access_token
+      const userInfo = data?.data?.user || data?.data?.userInfo || data?.user
+      
       if (token) { 
         localStorage.setItem('token', token)
+        // 🔥 如果后端返回了用户信息，全部存入本地，供管理面板使用
+        if (userInfo) {
+          localStorage.setItem('userInfo', JSON.stringify(userInfo))
+        }
         router.push('/shop') 
       } else { 
         alert('接口未返回 Token') 
@@ -164,3 +219,64 @@ const submit = async () => {
   }
 }
 </script>
+
+<style scoped>
+/* 登录页外层，带蓝白渐变 */
+.login-wrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e0f2fe 0%, #f8fafc 100%);
+  overflow: hidden;
+}
+
+/* 登录卡片样式 */
+.login-card {
+  width: 90%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 40px 30px 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(30, 58, 138, 0.08);
+  z-index: 10;
+  border: 1px solid rgba(255,255,255,0.6);
+}
+
+/* ---- 性感女性剪影 / 抽象流动蓝白特效 ---- */
+.bg-shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  z-index: 1;
+  opacity: 0.6;
+  animation: float 8s infinite ease-in-out alternate;
+}
+
+.shape1 {
+  width: 300px;
+  height: 400px;
+  background: linear-gradient(180deg, #3b82f6 0%, #93c5fd 100%);
+  top: -50px;
+  right: -50px;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; /* 模拟柔和人体曲线轮廓 */
+}
+
+.shape2 {
+  width: 250px;
+  height: 350px;
+  background: linear-gradient(180deg, #1e3a8a 0%, #60a5fa 100%);
+  bottom: -50px;
+  left: -50px;
+  border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%;
+  animation-delay: -4s;
+}
+
+@keyframes float {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(20px) scale(1.05); }
+}
+</style>

@@ -15,25 +15,28 @@ const router = createRouter({
   routes,
 })
 
-// 全局白名单，只有 /auth 不需要登录
-const whiteList = ['/auth']
-
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
-  if (token === 'undefined' || token === 'null') localStorage.removeItem('token')
+  // 🔥 强效暗门：只要网址后面带了 ?clear=1，就强制洗清所有脏数据
+  if (to.query.clear === '1') {
+    localStorage.clear()
+    next('/auth')
+    return
+  }
+
+  let token = localStorage.getItem('token')
   
-  if (token) {
-    if (to.path === '/auth') {
-      next('/') // 有 token 就不去登录页
-    } else {
-      next()
-    }
+  // 清洗各种奇怪的空值
+  if (token === 'undefined' || token === 'null' || token === 'false' || token === '') {
+    localStorage.removeItem('token')
+    token = null
+  }
+
+  if (!token) {
+    if (to.path === '/auth') next()
+    else next('/auth')
   } else {
-    if (whiteList.includes(to.path)) {
-      next() // 白名单直接放行
-    } else {
-      next('/auth') // 没 token 强制踢回登录页
-    }
+    if (to.path === '/auth') next('/')
+    else next()
   }
 })
 

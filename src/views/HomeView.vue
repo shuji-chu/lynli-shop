@@ -96,7 +96,9 @@ const categories = [
   { name: '情趣玩具', color: '#ec4899' },
   { name: '情趣内衣', color: '#8b5cf6' },
   { name: '情趣用品', color: '#f59e0b' },
-  { name: '情侣共震', color: '#10b981' }
+  { name: '情侣共震', color: '#10b981' },
+  { name: '趣味玩具', color: '#f43f5e' },
+  { name: '解压盲盒', color: '#06b6d4' }
 ]
 
 // 执行搜索并保存历史

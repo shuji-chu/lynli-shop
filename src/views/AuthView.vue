@@ -216,7 +216,7 @@ const sendEmailCode = async () => {
   countdown.value = 60
   
   try {
-    const res = await fetch(API + '/api/v1/auth/send_code', {
+    const res = await fetch(API + '/api/v1/passport/auth/send-code', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: form.email })
@@ -252,10 +252,10 @@ const submit = async () => {
     let body = {}
 
     if (mode.value === 'login') {
-      url = API + '/api/v1/auth/login'
+      url = API + '/api/v1/passport/auth/login'
       body = { email: form.email, password: form.password }
     } else if (mode.value === 'register') {
-      url = API + '/api/v1/auth/register'
+      url = API + '/api/v1/passport/auth/register'
       body = { email: form.email, password: form.password, nickname: form.nickname, code: form.emailCode }
     } else if (mode.value === 'forget') {
       url = API + '/api/v1/auth/reset_password'

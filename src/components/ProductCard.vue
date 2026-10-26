@@ -1,21 +1,22 @@
 <template>
   <div class="card" @click="goDetail">
     <div class="img-wrap">
-      <!-- 骨架屏 -->
-      <div v-if="!loaded && !error" class="skeleton img-skel"></div>
-      <!-- 真实图片，带 @error 兜底 -->
+      <!-- 极简骨架屏 -->
+      <div v-if="!loaded" class="skeleton"></div>
+      <!-- 真实图片，带懒加载和淡入 -->
       <img
-        v-show="loaded && !error"
+        v-show="loaded"
         :src="product.image"
         :alt="product.title"
         loading="lazy"
         @load="loaded = true"
         @error="handleError"
+        class="fade-in"
       />
-      <!-- 加载失败兜底图 -->
+      <!-- 加载失败兜底 -->
       <div v-if="error" class="fallback-img">
         <span class="icon">📦</span>
-        <span class="text">图片加载中</span>
+        <span>图片加载中</span>
       </div>
     </div>
     <div class="info">
@@ -35,10 +36,7 @@ import { useRouter } from 'vue-router'
 import { formatPrice } from '@/utils/format'
 
 const props = defineProps({
-  product: {
-    type: Object,
-    required: true
-  }
+  product: { type: Object, required: true }
 })
 
 const router = useRouter()
@@ -50,8 +48,8 @@ const goDetail = () => {
 }
 
 const handleError = () => {
-  loaded.value = true
   error.value = true
+  loaded.value = true
 }
 </script>
 
@@ -62,25 +60,29 @@ const handleError = () => {
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.04);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
-}
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 .img-wrap {
   width: 100%;
   aspect-ratio: 1 / 1;
   position: relative;
   background: #f8fafc;
+  overflow: hidden;
 }
 .img-wrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+/* 平滑淡入动画 */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .skeleton {
   position: absolute;

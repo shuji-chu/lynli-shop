@@ -2,7 +2,7 @@
   <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg,#e0f2fe,#f8fafc);">
     
     <!-- 登录/注册卡片 -->
-    <div style="width: 90%; max-width: 380px; background: #fff; padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+    <div style="width: 90%; max-width: 380px; background: #fff; padding: 40px 30px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
       
       <h2 style="text-align: center; font-size: 26px; font-weight: 900; color: #1e3a8a; margin-bottom: 20px;">LYNLI <span style="color: #3b82f6; font-size: 20px;">泠礼</span></h2>
       
@@ -41,9 +41,15 @@
         </button>
       </form>
 
-      <div style="display:flex; justify-content:flex-end; margin-top:15px; font-size:14px; color:#64748b;">
-        <span v-if="mode === 'login'" @click="mode='forget'" style="cursor:pointer;">忘记密码？</span>
+      <!-- 底部操作区：左边忘记密码，右边立即注册 -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; font-size:14px;">
+        <!-- 左边 -->
+        <span v-if="mode === 'login'" @click="mode='forget'" style="cursor:pointer; color:#64748b;">忘记密码？</span>
         <span v-if="mode === 'forget'" @click="mode='login'" style="cursor:pointer; color:#3b82f6;">返回登录</span>
+        
+        <!-- 右边 -->
+        <span v-if="mode === 'login'" @click="mode='register'" style="cursor:pointer; color:#3b82f6; font-weight:bold;">还没有账号？立即注册</span>
+        <span v-if="mode === 'register'" @click="mode='login'" style="cursor:pointer; color:#3b82f6; font-weight:bold;">已有账号？去登录</span>
       </div>
 
     </div>

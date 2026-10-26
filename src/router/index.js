@@ -9,7 +9,7 @@ const routes = [
   { path: '/orders', name: 'orders', component: () => import('@/views/OrdersView.vue') },
   // 🔥 新增所有“我的”页面的子路由
   { path: '/address', name: 'address', component: () => import('@/views/Placeholder.vue') },
-  { path: '/security', name: 'security', component: () => import('@/views/Placeholder.vue') },
+  { path: '/security', name: 'security', component: () => import('@/views/SecurityView.vue') },
   { path: '/coupons', name: 'coupons', component: () => import('@/views/Placeholder.vue') },
   { path: '/points', name: 'points', component: () => import('@/views/Placeholder.vue') },
   { path: '/favorites', name: 'favorites', component: () => import('@/views/Placeholder.vue') },

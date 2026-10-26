@@ -134,7 +134,7 @@ onMounted(async () => {
 
 <style scoped>
 /* 蓝白质感背景 */
-.order-list-page { padding-top: 64px; min-height: 100vh; position: relative; background: #f8fafc; padding-bottom: 20px; overflow-x: hidden; }
+.order-list-page {  min-height: 100vh; position: relative; background: #f8fafc; padding-bottom: 20px; overflow-x: hidden; }
 .soft-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
 .glow { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; }
 .glow-blue { width: 350px; height: 350px; background: #bfdbfe; top: -50px; left: -100px; animation: floatGlow 8s infinite alternate ease-in-out; }

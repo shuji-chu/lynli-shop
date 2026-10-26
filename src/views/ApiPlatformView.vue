@@ -177,7 +177,7 @@ const runTest = async () => {
 
 <style scoped>
 /* 保持原有的浅色卡片风格 */
-.page-wrap { padding-top: 64px; min-height: 100vh; background: #f5f7fa; }
+.page-wrap {  min-height: 100vh; background: #f5f7fa; }
 .header { height: 56px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid #f1f5f9; }
 .header button { background: none; border: none; font-size: 24px; }
 .header h2 { font-size: 18px; margin: 0; }

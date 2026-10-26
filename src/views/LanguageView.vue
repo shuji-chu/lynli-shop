@@ -1,5 +1,5 @@
 <template>
-  <div class="page-wrap" style="padding-top: 64px;">
+  <div class="page-wrap" style="">
     <div class="header"><button @click="$router.back()">←</button><button class="back-btn" @click="$router.back()" style="background:none;border:none;font-size:24px;color:#1e293b;cursor:pointer;">←</button><h2>地区与语言</h2><div></div></div>
     <div class="content">
       <div class="list">

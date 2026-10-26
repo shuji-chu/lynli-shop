@@ -20,6 +20,7 @@ const whiteList = ['/auth']
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
+  if (token === 'undefined' || token === 'null') localStorage.removeItem('token')
   
   if (token) {
     if (to.path === '/auth') {

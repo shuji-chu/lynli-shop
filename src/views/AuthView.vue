@@ -79,14 +79,17 @@
         </div>
       </form>
 
-      <!-- 🚨 底部常驻协议声明区 -->
       <div class="privacy-footer">
         登录即代表同意 <a @click.prevent="openModal('privacy')" href="#">《用户隐私协议》</a> 和 <a @click.prevent="openModal('terms')" href="#">《服务条款》</a>
       </div>
 
     </div>
 
-    <!-- 隐私弹窗组件 -->
+    <!-- 🚨 自定义高级提示框，替代 alert() -->
+    <div v-if="toast.show" class="custom-toast" :class="toast.type">
+      {{ toast.message }}
+    </div>
+
     <PrivacyModal :show="showModal" :type="modalType" @close="showModal = false" />
   </div>
 </template>
@@ -98,16 +101,9 @@ import PrivacyModal from '@/components/PrivacyModal.vue'
 import paper from 'paper'
 
 const router = useRouter()
-const mode = ref('login') // login | register | forget
+const mode = ref('login') 
 
-const form = reactive({ 
-  email: '', 
-  password: '', 
-  rePassword: '', 
-  nickname: '',
-  emailCode: '', 
-  captcha: '' 
-})
+const form = reactive({ email: '', password: '', rePassword: '', nickname: '', emailCode: '', captcha: '' })
 const rememberMe = ref(false)
 const agreePrivacy = ref(false)
 
@@ -115,6 +111,17 @@ const API = 'https://api.lynli.me'
 const counting = ref(false)
 const countdown = ref(60)
 const captchaText = ref('')
+
+// 🚨 Toast 提示框逻辑
+const toast = reactive({ show: false, message: '', type: 'error' })
+let toastTimer = null
+const showToast = (msg, type = 'error') => {
+  toast.message = msg
+  toast.type = type
+  toast.show = true
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { toast.show = false }, 3000)
+}
 
 const showModal = ref(false)
 const modalType = ref('privacy')
@@ -200,10 +207,11 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (paperScope) paperScope.remove()
+  clearTimeout(toastTimer)
 })
 
 const sendEmailCode = async () => {
-  if (!form.email) return alert('请先输入邮箱')
+  if (!form.email) return showToast('请先输入邮箱')
   counting.value = true
   countdown.value = 60
   
@@ -214,29 +222,29 @@ const sendEmailCode = async () => {
       body: JSON.stringify({ email: form.email })
     })
     if (res.ok) {
-      alert('验证码已发送，请查收邮箱')
+      showToast('验证码已发送，请查收邮箱', 'success')
       const timer = setInterval(() => {
         countdown.value--
         if (countdown.value <= 0) { clearInterval(timer); counting.value = false }
       }, 1000)
     } else {
       counting.value = false
-      alert('发送失败，请检查邮箱')
+      showToast('发送失败，请检查邮箱')
     }
   } catch (e) {
     counting.value = false
-    alert('网络错误')
+    showToast('网络错误')
   }
 }
 
 const submit = async () => {
   if (mode.value === 'login' && form.captcha.toUpperCase() !== captchaText.value) {
-    alert('图形验证码错误'); generateCaptcha(); form.captcha = ''; return
+    showToast('图形验证码错误'); generateCaptcha(); form.captcha = ''; return
   }
   
   if (mode.value === 'register') {
-    if (form.password !== form.rePassword) return alert('两次输入的密码不一致')
-    if (!agreePrivacy.value) return alert('请先阅读并勾选用户隐私协议')
+    if (form.password !== form.rePassword) return showToast('两次输入的密码不一致')
+    if (!agreePrivacy.value) return showToast('请先阅读并勾选用户隐私协议')
   }
 
   try {
@@ -264,7 +272,7 @@ const submit = async () => {
     
     if (res.ok) {
       if (mode.value === 'forget') {
-        alert('密码重置成功，请重新登录')
+        showToast('密码重置成功，请重新登录', 'success')
         mode.value = 'login'
         form.password = ''
         return
@@ -288,165 +296,60 @@ const submit = async () => {
         if (userInfo) localStorage.setItem('userInfo', JSON.stringify(userInfo))
         router.push('/shop') 
       } else { 
-        alert('接口未返回 Token') 
+        // 🚨 重点：如果没拿到 token，把服务器返回的原始数据打出来给你看！
+        showToast('后端返回数据异常: ' + JSON.stringify(data)) 
       }
     } else {
-      alert(data.message || '操作失败，请检查输入')
+      showToast(data.message || '操作失败，请检查输入')
     }
   } catch (e) { 
-    alert('请求失败，请检查网络') 
+    showToast('请求失败，请检查网络') 
   }
 }
 </script>
 
 <style scoped>
-.login-container {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: #f0f7ff;
-  overflow: hidden;
-}
+/* ... 前面的样式保持不变，最底下加上 Toast 的样式 ... */
+.login-container { position: relative; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f0f7ff; overflow: hidden; }
+#canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+.login-card { width: 90%; max-width: 380px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); padding: 40px 30px 20px; border-radius: 20px; box-shadow: 0 20px 40px rgba(30, 58, 138, 0.1); z-index: 10; border: 1px solid rgba(255, 255, 255, 0.6); position: relative; }
+.form-body { display: flex; flex-direction: column; gap: 16px; }
+.input-field { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 10px; outline: none; background: #f8fafc; box-sizing: border-box; font-size: 15px; }
+.code-group { display: flex; gap: 10px; align-items: center; }
+.code-input { flex: 1; }
+.code-btn { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; border-radius: 10px; padding: 0 15px; font-size: 14px; height: 48px; cursor: pointer; white-space: nowrap; }
+.captcha-box { cursor: pointer; user-select: none; background: #e2e8f0; color: #1e3a8a; font-weight: bold; letter-spacing: 3px; padding: 12px 15px; border-radius: 10px; font-family: monospace; font-size: 18px; height: 48px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; }
+.remember-box { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #64748b; }
+.remember-box a { color: #3b82f6; text-decoration: none; }
+.submit-btn { background: #3b82f6; color: #fff; border: none; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+.bottom-links { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 14px; }
+.link-gray { color: #64748b; cursor: pointer; }
+.link-blue { color: #3b82f6; font-weight: bold; cursor: pointer; }
+.privacy-footer { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 25px; padding-top: 15px; border-top: 1px dashed #e2e8f0; }
+.privacy-footer a { color: #3b82f6; text-decoration: none; }
 
-#canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-}
-
-.login-card {
-  width: 90%;
-  max-width: 380px;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20px);
-  padding: 40px 30px 20px;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(30, 58, 138, 0.1);
-  z-index: 10;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  position: relative;
-}
-
-.form-body {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.input-field {
-  width: 100%;
-  padding: 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  outline: none;
-  background: #f8fafc;
-  box-sizing: border-box;
-  font-size: 15px;
-}
-
-.code-group {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.code-input {
-  flex: 1;
-}
-
-.code-btn {
-  background: #eff6ff;
-  color: #3b82f6;
-  border: 1px solid #bfdbfe;
-  border-radius: 10px;
-  padding: 0 15px;
+/* 🚨 自定义 Toast 样式：彻底干掉浏览器自带的丑弹窗 */
+.custom-toast {
+  position: fixed;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 8px;
   font-size: 14px;
-  height: 48px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.captcha-box {
-  cursor: pointer;
-  user-select: none;
-  background: #e2e8f0;
-  color: #1e3a8a;
-  font-weight: bold;
-  letter-spacing: 3px;
-  padding: 12px 15px;
-  border-radius: 10px;
-  font-family: monospace;
-  font-size: 18px;
-  height: 48px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.remember-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #64748b;
-}
-
-.remember-box a {
-  color: #3b82f6;
-  text-decoration: none;
-}
-
-.submit-btn {
-  background: #3b82f6;
   color: #fff;
-  border: none;
-  padding: 15px;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: bold;
-  margin-top: 10px;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-}
-
-.bottom-links {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-.link-gray {
-  color: #64748b;
-  cursor: pointer;
-}
-
-.link-blue {
-  color: #3b82f6;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-/* 🚨 常驻的底部协议 */
-.privacy-footer {
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  max-width: 80%;
   text-align: center;
-  font-size: 12px;
-  color: #94a3b8;
-  margin-top: 25px;
-  padding-top: 15px;
-  border-top: 1px dashed #e2e8f0;
+  word-break: break-all;
+  animation: slideDown 0.3s ease-out;
 }
+.custom-toast.error { background: rgba(239, 68, 68, 0.95); }
+.custom-toast.success { background: rgba(34, 197, 94, 0.95); }
 
-.privacy-footer a {
-  color: #3b82f6;
-  text-decoration: none;
+@keyframes slideDown {
+  from { top: -50px; opacity: 0; }
+  to { top: 40px; opacity: 1; }
 }
 </style>

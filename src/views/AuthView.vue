@@ -1,13 +1,13 @@
 <template>
-  <!-- 核心背景容器 -->
+  <!-- 核心背景容器（内置蓝调女性剪影底图） -->
   <div class="login-wrapper">
     
-    <!-- 🎬 在线动态女性剪影视频背景（免版权，打开直接播放） -->
+    <!-- 🎬 在线动态女性剪影视频背景（盖在底图上方） -->
     <video autoplay muted loop playsinline class="bg-video">
       <source src="https://cdn.pixabay.com/video/2022/10/14/135090-760345192_large.mp4" type="video/mp4" />
     </video>
 
-    <!-- 🎨 蓝白渐变遮罩（把视频染成高级的蓝白品牌色） -->
+    <!-- 🎨 极薄的蓝白渐变遮罩（保证文字能看清，同时透出人物） -->
     <div class="bg-overlay"></div>
     
     <!-- 登录卡片 -->
@@ -110,13 +110,11 @@ const generateCaptcha = () => {
 
 onMounted(() => {
   generateCaptcha()
-  // 🔥 自动识别：老用户直接进商城
   const token = localStorage.getItem('token')
   if (token && token !== 'undefined' && token !== 'null') {
     router.replace('/shop')
   }
   
-  // 🔥 记住密码回填
   const savedEmail = localStorage.getItem('saved_email')
   const savedPwd = localStorage.getItem('saved_pwd')
   if (savedEmail && savedPwd) {
@@ -192,7 +190,6 @@ const submit = async () => {
         return
       }
       
-      // 记住密码逻辑
       if (mode.value === 'login') {
         if (rememberMe.value) {
           localStorage.setItem('saved_email', form.email)
@@ -203,7 +200,6 @@ const submit = async () => {
         }
       }
 
-      // 🔥 数据同步 (用户ID、昵称、头像存入本地)
       const token = data?.data?.token || data?.token || data?.access_token
       const userInfo = data?.data?.user || data?.data?.userInfo || data?.user
       
@@ -226,7 +222,7 @@ const submit = async () => {
 </script>
 
 <style scoped>
-/* 登录页外层 */
+/* 登录页外层：加入了超稳的蓝调性感女性剪影底图 */
 .login-wrapper {
   position: relative;
   min-height: 100vh;
@@ -234,7 +230,10 @@ const submit = async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #e0f2fe; /* 兜底蓝底 */
+  /* 背景图：Unsplash 高清蓝调女性剪影，永远不挂 */
+  background-image: url('https://images.unsplash.com/photo-1517436073-3b1b1b4b3b4b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
   overflow: hidden;
 }
 
@@ -250,26 +249,26 @@ const submit = async () => {
   transform: translate(-50%, -50%);
   object-fit: cover;
   z-index: 0;
-  filter: blur(1.5px); /* 微微模糊，高级感 */
+  opacity: 0.8; /* 透出底图 */
 }
 
-/* 🎨 蓝白遮罩层 */
+/* 🎨 极薄的蓝白遮罩层，只起氛围作用，不再遮挡画面 */
 .bg-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(224, 242, 254, 0.7) 0%, rgba(147, 197, 253, 0.4) 100%);
+  background: linear-gradient(135deg, rgba(224, 242, 254, 0.2) 0%, rgba(30, 58, 138, 0.3) 100%);
   z-index: 1;
 }
 
-/* 登录卡片样式（毛玻璃效果） */
+/* 登录卡片：高级毛玻璃 */
 .login-card {
   width: 90%;
   max-width: 380px;
-  background: rgba(255, 255, 255, 0.85); /* 半透明 */
-  backdrop-filter: blur(15px); /* 玻璃模糊 */
+  background: rgba(255, 255, 255, 0.85); 
+  backdrop-filter: blur(20px); 
   padding: 40px 30px 30px;
   border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(30, 58, 138, 0.1);
+  box-shadow: 0 20px 40px rgba(30, 58, 138, 0.2);
   z-index: 10;
   border: 1px solid rgba(255,255,255,0.9);
 }

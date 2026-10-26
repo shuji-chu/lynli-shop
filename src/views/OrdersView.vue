@@ -1,7 +1,6 @@
 <template>
   <div class="container orders-page">
-    
-    <!-- 1. 头部：个人信息卡片 (增加顶部间距防止被导航栏盖住) -->
+    <!-- 头部信息卡片 -->
     <div class="profile-card">
       <div class="p-top">
         <img :src="myAvatar" class="p-avatar" />
@@ -9,93 +8,60 @@
           <h3 class="p-name">{{ myNickname }}</h3>
           <p class="p-role" v-if="userInfo.role === 'super' || userInfo.role === 'admin'">尊贵的管理员</p>
         </div>
-        <!-- 退出登录改成右上角的齿轮/设置图标 -->
-        <div class="settings-icon" @click="handleLogout">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          <span>退出</span>
+        <div class="settings-icon" @click="$router.push('/settings')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </div>
       </div>
-      
-      <!-- 快捷功能入口 -->
       <div class="p-links">
-        <span @click="$router.push('/address?title=收货地址')">收货地址</span>
-        <span @click="$router.push('/security?title=账号与安全')">账号与安全</span>
-        <span @click="showToast('客服微信: lynli_boss')">联系客服</span>
+        <span @click="$router.push('/profile')">个人信息</span>
+        <span @click="$router.push('/settings')">账号与安全</span>
+        <span @click="$router.push('/help')">联系客服</span>
       </div>
     </div>
 
-    <!-- 2. 我的订单 -->
+    <!-- 我的订单 -->
     <div class="section">
       <div class="section-header">
         <h3>我的订单</h3>
         <span class="all-orders" @click="currentTab = 'all'">全部订单 &gt;</span>
       </div>
-
       <div class="order-nav">
-        <div class="nav-item" @click="currentTab = 'unpaid'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
-          <span>待付款</span>
-        </div>
-        <div class="nav-item" @click="currentTab = 'unshipped'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-          <span>待发货</span>
-        </div>
-        <div class="nav-item" @click="currentTab = 'shipped'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          <span>待收货</span>
-        </div>
-        <div class="nav-item" @click="currentTab = 'completed'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <span>待评价</span>
-        </div>
-        <div class="nav-item" @click="currentTab = 'refund'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-          <span>退款/售后</span>
-        </div>
+        <div class="nav-item" @click="currentTab = 'unpaid'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg><span>待付款</span></div>
+        <div class="nav-item" @click="currentTab = 'unshipped'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><span>待发货</span></div>
+        <div class="nav-item" @click="currentTab = 'shipped'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><span>待收货</span></div>
+        <div class="nav-item" @click="currentTab = 'completed'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span>待评价</span></div>
+        <div class="nav-item" @click="currentTab = 'refund'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span>退款/售后</span></div>
       </div>
-
       <div class="order-content">
         <div v-if="loading" class="loading">加载中...</div>
-        <div v-else-if="filteredList.length === 0" class="empty-orders">
-          <p>暂无相关订单</p>
-          <button @click="$router.push('/shop')" class="go-shop-btn">去逛逛</button>
-        </div>
-
+        <div v-else-if="filteredList.length === 0" class="empty-orders"><p>暂无相关订单</p><button @click="$router.push('/shop')" class="go-shop-btn">去逛逛</button></div>
         <ul v-else class="order-list">
           <li v-for="o in filteredList" :key="o.id || o.trade_no" class="order-item">
-            <div class="o-head">
-              <span class="o-no">订单号：{{ o.trade_no || o.id }}</span>
-              <span class="o-status">{{ o.status }}</span>
-            </div>
-            <div class="o-foot">
-              <span>{{ formatTime(o.created_at) }}</span>
-              <span class="o-amount">合计：¥{{ o.amount }}</span>
-            </div>
+            <div class="o-head"><span class="o-no">订单号：{{ o.trade_no || o.id }}</span><span class="o-status">{{ o.status }}</span></div>
+            <div class="o-foot"><span>{{ formatTime(o.created_at) }}</span><span class="o-amount">合计：¥{{ o.amount }}</span></div>
           </li>
         </ul>
       </div>
     </div>
 
-    <!-- 3. 我的资产 / 工具区 (全部带跳转) -->
-    <div class="section tools-section">
-      <div class="tool-item" @click="$router.push('/coupons?title=我的优惠券')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16v12H4z"/><path d="M4 10h16"/><path d="M8 15h4"/></svg>
-        <span>优惠券</span>
+    <!-- 🚨 新功能：商家与开发者矩阵 -->
+    <div class="section list-section">
+      <div class="list-item" @click="$router.push('/merchant')">
+        <div class="l-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <span>商家入驻</span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
       </div>
-      <div class="tool-item" @click="$router.push('/points?title=我的积分')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span>积分</span>
+      <div class="list-item" @click="$router.push('/developer')">
+        <div class="l-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+        <span>API 开放平台</span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
       </div>
-      <div class="tool-item" @click="$router.push('/favorites?title=我的收藏')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        <span>收藏</span>
-      </div>
-      <div class="tool-item" @click="$router.push('/favorites?title=浏览足迹')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span>足迹</span>
+      <div class="list-item" @click="$router.push('/help')">
+        <div class="l-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <span>帮助与反馈</span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -115,14 +81,8 @@ const userInfo = computed(() => {
   if (!data) return {}
   try { return JSON.parse(data) } catch (e) { return {} }
 })
-
 const myAvatar = computed(() => userInfo.value.avatar || 'https://api.dicebear.com/7.x/initials/svg?seed=lynli&backgroundColor=3b82f6&textColor=ffffff')
 const myNickname = computed(() => userInfo.value.nickname || userInfo.value.email?.split('@')[0] || '用户')
-
-const showToast = (msg) => {
-  if (Toast && Toast.info) Toast.info(msg)
-  else alert(msg)
-}
 
 const filteredList = computed(() => {
   if (currentTab.value === 'all') return list.value
@@ -144,10 +104,7 @@ function formatTime(ts) {
 }
 
 async function load() {
-  if (!localStorage.getItem('token')) {
-    router.push('/auth')
-    return
-  }
+  if (!localStorage.getItem('token')) { router.push('/auth'); return }
   loading.value = true
   try {
     const res = await getMyOrders()
@@ -155,39 +112,21 @@ async function load() {
     else if (Array.isArray(res)) list.value = res
   } catch (e) {
     console.warn('获取订单失败', e)
-  } finally {
-    loading.value = false
-  }
+  } finally { loading.value = false }
 }
-
-function handleLogout() {
-  if(confirm('确定要退出登录吗？')) {
-    localStorage.removeItem('token')
-    localStorage.removeItem('userInfo')
-    if (Toast && Toast.success) Toast.success('已退出登录')
-    router.push('/auth')
-  }
-}
-
 onMounted(load)
 </script>
 
 <style scoped>
-/* 核心修改：增加了 padding-top，防止被顶部导航栏遮挡 */
 .orders-page { padding-top: 76px; padding-bottom: 40px; background: #f5f7fa; min-height: 100vh; }
-
 .profile-card { position: relative; background: linear-gradient(135deg, #3b82f6, #1e3a8a); border-radius: 20px; padding: 24px; color: #fff; box-shadow: 0 10px 20px rgba(59,130,246,0.2); margin-bottom: 16px; }
 .p-top { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
 .p-avatar { width: 68px; height: 68px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); object-fit: cover; }
 .p-info { display: flex; flex-direction: column; gap: 6px; }
 .p-name { font-size: 22px; font-weight: bold; margin: 0; }
 .p-role { font-size: 12px; background: rgba(255,255,255,0.2); display: inline-block; padding: 3px 10px; border-radius: 12px; margin: 0; width: fit-content; }
-
-/* 退出按钮改成右上角小巧的图标 */
-.settings-icon { position: absolute; top: 24px; right: 20px; display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; }
-.settings-icon:hover { opacity: 1; }
-.settings-icon svg { width: 14px; height: 14px; }
-
+.settings-icon { position: absolute; top: 24px; right: 20px; cursor: pointer; opacity: 0.8; }
+.settings-icon svg { width: 20px; height: 20px; }
 .p-links { display: flex; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.9); border-top: 1px solid rgba(255,255,255,0.2); padding-top: 16px; }
 .p-links span { cursor: pointer; }
 
@@ -212,8 +151,11 @@ onMounted(load)
 .o-foot { display: flex; justify-content: space-between; font-size: 13px; color: #94a3b8; }
 .o-amount { color: #f59e0b; font-weight: bold; font-size: 15px; }
 
-.tools-section { display: flex; justify-content: space-around; padding: 24px 10px; }
-.tool-item { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; color: #475569; cursor: pointer; transition: color 0.2s; }
-.tool-item:hover { color: #3b82f6; }
-.tool-item svg { width: 24px; height: 24px; }
+/* 新的列表样式 */
+.list-section { padding: 0 16px; display: flex; flex-direction: column; }
+.list-item { display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 15px; color: #334155; gap: 12px; }
+.list-item:last-child { border-bottom: none; }
+.l-icon { display: flex; align-items: center; justify-content: center; color: #3b82f6; }
+.l-icon svg { width: 22px; height: 22px; }
+.arrow { width: 16px; height: 16px; margin-left: auto; }
 </style>

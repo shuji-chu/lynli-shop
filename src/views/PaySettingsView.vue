@@ -28,35 +28,37 @@
         </div>
       </div>
       
-      <div class="section-title">海外 / 跨境支付</div>
+      <div class="section-title">跨境 / 海外支付 (高保密通道)</div>
       <div class="list">
-        <!-- PayPal -->
-        <div class="item">
-          <div class="brand-icon paypal">
-            <svg viewBox="0 0 1024 1024" width="24" height="24"><path d="M800 320c-13.4-33.4-41.6-60.6-82.6-78.6-35.4-15.6-82-20.6-135.6-14.4H308c-15.2 0-28.6 10.6-31.4 25.6L180 832c-2 10.4 6 20 16.4 20h167.2c15.2 0 28.6-10.6 31.4-25.6l34.8-220.2h151.2c112 0 192-44.4 222.2-132.2 15.4-44.4 10.8-102.2-3.2-154z" fill="#003087"/><path d="M710 320c-13.4-33.4-41.6-60.6-82.6-78.6-35.4-15.6-82-20.6-135.6-14.4H218c-15.2 0-28.6 10.6-31.4 25.6L90 832c-2 10.4 6 20 16.4 20h167.2c15.2 0 28.6-10.6 31.4-25.6l34.8-220.2h151.2c112 0 192-44.4 222.2-132.2 15.4-44.4 10.8-102.2-3.2-154z" fill="#0070BA"/></svg>
-          </div>
-          <span class="name">PayPal</span>
-          <span class="status unbound">未绑定</span>
-        </div>
-        
-        <!-- USDT (TRC20) -->
+        <!-- USDT -->
         <div class="item">
           <div class="brand-icon usdt">
             <svg viewBox="0 0 1024 1024" width="24" height="24"><path d="M512 1024C229.248 1024 0 794.752 0 512S229.248 0 512 0s512 229.248 512 512-229.248 512-512 512z" fill="#26A17B"/><path d="M571.349333 556.117333V455.210667h130.858667V298.666667H321.962667v156.544h130.858666v100.906666c-108.8 5.12-190.293333 26.069333-190.293333 51.285334 0 25.216 81.493333 46.165333 190.293333 51.285333v182.698667h118.528V658.688c108.672-5.12 190.208-26.026667 190.208-51.242667 0-25.216-81.536-46.122667-190.208-51.328zM571.349333 644.864v-0.042667c-1.706667 0.128-10.496 0.64-26.453333 0.64-14.122667 0-24.192-0.426667-27.776-0.64v0.042667c-98.389333-4.352-171.776-21.461333-171.776-41.984 0-20.48 73.386667-37.632 171.776-41.984v66.944c3.669333 0.256 13.909333 0.768 28.16 0.768 15.36 0 23.850667-0.512 25.984-0.768v-66.901333c98.261333 4.352 171.52 21.504 171.52 41.941333 0 20.522667-73.258667 37.632-171.52 41.984z" fill="#FFF"/></svg>
           </div>
-          <span class="name">USDT (TRC20)</span>
+          <span class="name">USDT 加密货币</span>
           <span class="status unbound">未绑定</span>
         </div>
         
-        <!-- Stripe -->
+        <!-- 国际信用卡 -->
         <div class="item">
-          <div class="brand-icon stripe">
-            <svg viewBox="0 0 24 24" width="24" height="24"><path d="M13.4 14.1c0-.8-.6-1.2-1.7-1.2-1.4 0-3.1.4-4.6 1.2v-4c1.6-.7 3.4-1.1 5-1.1 3.3 0 5.5 1.5 5.5 4.4 0 3.1-2.5 4.5-5.6 4.5-1.8 0-3.6-.5-4.9-1.4v-3.9c1.3.9 3 1.4 4.7 1.4.9 0 1.6-.3 1.6-1.1zM12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm0 22.1c-5.6 0-10.1-4.5-10.1-10.1S6.4 1.9 12 1.9s10.1 4.5 10.1 10.1-4.5 10.1-10.1 10.1z" fill="#635BFF"/></svg>
+          <div class="brand-icon card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
           </div>
-          <span class="name">Stripe</span>
+          <span class="name">国际信用卡通道</span>
+          <span class="status unbound">未绑定</span>
+        </div>
+
+        <!-- 加密货币 -->
+        <div class="item">
+          <div class="brand-icon crypto">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="#F59E0B"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2zm0 4h2v6h-2z"/></svg>
+          </div>
+          <span class="name">BTC / ETH 加密通道</span>
           <span class="status unbound">未绑定</span>
         </div>
       </div>
+      
+      <p class="tip">注：为保障您的隐私及资金安全，平台采用高风险独立网关，完全免风控限制。</p>
     </div>
   </div>
 </template>
@@ -72,7 +74,6 @@
 .item { display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid #f1f5f9; }
 .item:last-child { border-bottom: none; }
 
-/* Logo 容器，提供纯白背景或轻微阴影增强真实感 */
 .brand-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
 .brand-icon svg { width: 26px; height: 26px; }
 
@@ -80,4 +81,6 @@
 .status { font-size: 13px; }
 .bound { color: #10b981; }
 .unbound { color: #94a3b8; }
+
+.tip { font-size: 12px; color: #94a3b8; margin-top: 16px; text-align: center; line-height: 1.5; }
 </style>

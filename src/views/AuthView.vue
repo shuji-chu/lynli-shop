@@ -289,7 +289,7 @@ const submit = async () => {
       }
 
       const token = data?.data?.token || data?.token || data?.access_token
-      const userInfo = data?.data?.user || data?.data?.userInfo || data?.user
+      const userInfo = data?.data?.user || data?.user || data?.data?.userInfo || { email: form.email }
       
       if (token) { 
         localStorage.setItem('token', token)

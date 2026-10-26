@@ -1,347 +1,84 @@
 <template>
-  <div class="container detail" v-if="loading">
-    <div class="skel-img skeleton"></div>
-    <div class="skel-info">
-      <div class="skeleton line w70"></div>
-      <div class="skeleton line w40"></div>
-      <div class="skeleton line w90"></div>
-      <div class="skeleton price-skel"></div>
+  <div class="container detail-page" v-if="product">
+    <div class="img-wrap">
+      <img :src="product.image" alt="商品图" />
     </div>
-  </div>
-
-  <div class="container detail" v-else-if="product">
-    <div class="gallery">
-      <div class="main-img">
-        <div v-if="!imgLoaded" class="skeleton img-skel"></div>
-        <img
-          v-show="imgLoaded"
-          :src="currentImage"
-          :alt="product.title || product.name"
-          loading="lazy"
-          @load="imgLoaded = true"
-          @error="imgLoaded = true"
-        />
-      </div>
-      <div class="thumbs" v-if="gallery.length > 1">
-        <button
-          v-for="(img, i) in gallery"
-          :key="i"
-          class="thumb"
-          :class="{ active: i === current }"
-          @click="current = i"
-        >
-          <img :src="img" alt="缩略图" loading="lazy" />
-        </button>
-      </div>
-    </div>
-
-    <div class="info">
-      <h1 class="title">{{ product.title || product.name }}</h1>
-      <p v-if="product.desc || product.subtitle" class="desc">
-        {{ product.desc || product.subtitle }}
-      </p>
-      <p v-if="product.category || product.cat" class="cat-tag">
-        {{ product.category || product.cat }}
-      </p>
-
+    <div class="info-card">
       <div class="price-row">
-        <span class="price">{{ formatPrice(markupPrice(product.price)) }}</span>
-        <span class="origin">{{ formatPrice(product.price) }}</span>
-        <span class="markup-tag">含税上浮</span>
+        <span class="price">{{ formatPrice(product.price) }}</span>
+        <span class="sold">已售 {{ product.sold || 0 }}</span>
       </div>
-
-      <div class="qty-row">
-        <span class="label">数量</span>
-        <div class="stepper">
-          <button @click="dec">−</button>
-          <input v-model.number="qty" type="number" min="1" @input="fixQty" />
-          <button @click="inc">+</button>
-        </div>
-      </div>
-
-      <div class="ops">
-        <button class="btn-ghost" @click="add">加入购物车</button>
-        <button class="btn-gold" @click="buyNow">立即购买</button>
-      </div>
-
-      <div class="meta">
-        <p>· 私密包装发货，保护您的隐私</p>
-        <p>· 正品保障，支持售后</p>
+      <h1 class="title">{{ product.title }}</h1>
+      <p class="subtitle">{{ product.subtitle || '甄选好物 · 私密发货' }}</p>
+      <div class="tags">
+        <span class="tag">{{ product.category }}</span>
+        <span class="tag">现货</span>
+        <span class="tag">保密发货</span>
       </div>
     </div>
-  </div>
+    
+    <div class="desc-card">
+      <h3>商品详情</h3>
+      <div class="desc-content" v-html="product.detail || '暂无详情'"></div>
+    </div>
 
-  <div class="container empty" v-else-if="!failed">
-    <p>商品不存在或已下架</p>
-    <router-link to="/" class="btn-ghost">返回首页</router-link>
+    <div class="bottom-bar">
+      <button class="add-cart" @click="handleAddCart">加入购物车</button>
+      <button class="buy-now" @click="handleBuyNow">立即购买</button>
+    </div>
   </div>
-
-  <div class="container state-box" v-else>
-    <p class="state-icon">🛰️</p>
-    <p class="state-title">商品加载失败</p>
-    <p class="state-desc">可能是网络波动或接口跨域被拦截，请重试。</p>
-    <button class="btn-gold" @click="load">重新加载</button>
-  </div>
+  <div v-else class="loading">加载中...</div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getProductDetail, getProducts } from '@/api/product'
+import { getProductDetail } from '@/api/product'
 import { addToCart } from '@/store/cart'
-import { Toast } from '@/utils/toast'
 import { formatPrice } from '@/utils/format'
-import { markupPrice } from '@/utils/price'
+import { Toast } from '@/utils/toast'
 
 const route = useRoute()
 const router = useRouter()
 const product = ref(null)
-const loading = ref(true)
-const failed = ref(false)
-const qty = ref(1)
-const current = ref(0)
-const imgLoaded = ref(false)
 
-const gallery = computed(() => {
-  const p = product.value
-  if (!p) return []
-  const imgs = []
-  if (p.image || p.image_url || p.cover) imgs.push(p.image || p.image_url || p.cover)
-  if (Array.isArray(p.images)) imgs.push(...p.images)
-  if (Array.isArray(p.gallery)) imgs.push(...p.gallery)
-  return [...new Set(imgs.filter(Boolean))]
+onMounted(async () => {
+  try {
+    const res = await getProductDetail(route.params.id)
+    product.value = res.data || res
+  } catch (e) {
+    Toast.error('商品加载失败')
+  }
 })
-const currentImage = computed(() => gallery.value[current.value] || '')
 
-function fixQty() {
-  qty.value = Math.max(1, Math.floor(qty.value) || 1)
-}
-function inc() {
-  qty.value++
-}
-function dec() {
-  if (qty.value > 1) qty.value--
-}
-
-function add() {
-  addToCart(product.value, qty.value)
+const handleAddCart = () => {
+  addToCart(product.value)
   Toast.success('已加入购物车')
 }
-function buyNow() {
-  addToCart(product.value, qty.value)
-  router.push({ name: 'cart' })
-}
 
-async function load() {
-  const id = route.params.id
-  try {
-    const res = await getProductDetail(id)
-    if (res && (res.id != null || res.title || res.name)) {
-      product.value = res
-    } else {
-      // 兼容：详情接口不支持时回退到列表查找
-      const listRes = await getProducts()
-      const list = Array.isArray(listRes)
-        ? listRes
-        : listRes?.list || listRes?.items || listRes?.data || []
-      product.value = list.find((p) => String(p.id) === String(id)) || null
-    }
-  } catch {
-    product.value = null
-    failed.value = true
-  } finally {
-    loading.value = false
-    current.value = 0
-    imgLoaded.value = false
-  }
+const handleBuyNow = () => {
+  addToCart(product.value)
+  router.push('/cart')
 }
-
-onMounted(load)
 </script>
 
 <style scoped>
-.detail {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 22px;
-  padding-top: 24px;
-}
-.gallery .main-img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: rgba(47, 107, 224, 0.05);
-}
-.gallery .main-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.img-skel {
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-}
-.thumbs {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-  overflow-x: auto;
-}
-.thumb {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  flex: 0 0 auto;
-  opacity: 0.6;
-  transition: opacity 0.2s, border-color 0.2s;
-}
-.thumb.active {
-  opacity: 1;
-  border-color: var(--gold);
-}
-.thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.title {
-  font-size: 24px;
-  font-weight: 700;
-}
-.desc {
-  margin-top: 10px;
-  color: var(--text-2);
-  font-size: 14px;
-}
-.cat-tag {
-  display: inline-block;
-  margin-top: 12px;
-  font-size: 12px;
-  color: var(--gold);
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  padding: 3px 10px;
-}
-.price-row {
-  margin-top: 18px;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-.price {
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--gold-bright);
-}
-.origin {
-  font-size: 15px;
-  color: var(--text-3);
-  text-decoration: line-through;
-}
-.markup-tag {
-  align-self: center;
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 8px;
-  color: var(--accent);
-  border: 1px solid var(--border-strong);
-  background: rgba(47, 107, 224, 0.08);
-}
-.qty-row {
-  margin-top: 22px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.label {
-  font-size: 14px;
-  color: var(--text-2);
-}
-.stepper {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-}
-.stepper button {
-  width: 40px;
-  height: 40px;
-  font-size: 20px;
-  color: var(--text-1);
-  background: rgba(47, 107, 224, 0.06);
-}
-.stepper button:active {
-  background: rgba(47, 107, 224, 0.12);
-}
-.stepper input {
-  width: 56px;
-  height: 40px;
-  text-align: center;
-  border: none;
-  background: transparent;
-  color: var(--text-1);
-  font-size: 16px;
-  -moz-appearance: textfield;
-}
-.stepper input::-webkit-outer-spin-button,
-.stepper input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.ops {
-  margin-top: 26px;
-  display: flex;
-  gap: 14px;
-}
-.ops .btn-ghost,
-.ops .btn-gold {
-  flex: 1;
-}
-.meta {
-  margin-top: 26px;
-  font-size: 13px;
-  color: var(--text-3);
-  line-height: 1.9;
-}
-.skel-img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: var(--radius);
-}
-.skel-info {
-  padding: 10px 0;
-}
-.skel-info .line {
-  height: 16px;
-  margin-bottom: 14px;
-}
-.skel-info .price-skel {
-  height: 26px;
-  width: 36%;
-  margin-top: 20px;
-}
-.empty {
-  text-align: center;
-  padding: 80px 0;
-  color: var(--text-3);
-}
-.empty .btn-ghost {
-  margin-top: 16px;
-}
-@media (min-width: 768px) {
-  .detail {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 40px;
-    align-items: start;
-  }
-  .title {
-    font-size: 28px;
-  }
-}
+.detail-page { padding-top: 60px; padding-bottom: 80px; background: #f8fafc; min-height: 100vh; }
+.img-wrap { width: 100%; aspect-ratio: 1/1; background: #fff; }
+.img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.info-card { background: #fff; padding: 16px; margin-bottom: 12px; }
+.price-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
+.price { font-size: 24px; font-weight: bold; color: #3b82f6; }
+.sold { font-size: 13px; color: #94a3b8; }
+.title { font-size: 18px; color: #1e293b; margin: 0 0 8px; line-height: 1.4; }
+.subtitle { font-size: 14px; color: #64748b; margin: 0 0 12px; }
+.tags { display: flex; gap: 8px; }
+.tag { background: #eff6ff; color: #3b82f6; font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+.desc-card { background: #fff; padding: 16px; }
+.desc-card h3 { font-size: 15px; color: #1e293b; margin: 0 0 12px; border-left: 3px solid #3b82f6; padding-left: 8px; }
+.desc-content { font-size: 14px; color: #475569; line-height: 1.6; }
+.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #fff; display: flex; padding: 8px 16px; gap: 12px; border-top: 1px solid #eee; z-index: 100; }
+.add-cart { flex: 1; background: #eff6ff; color: #3b82f6; border: 1px solid #3b82f6; border-radius: 20px; font-size: 15px; font-weight: bold; }
+.buy-now { flex: 1; background: #3b82f6; color: #fff; border: none; border-radius: 20px; font-size: 15px; font-weight: bold; }
+.loading { text-align: center; padding: 100px 0; color: #94a3b8; }
 </style>

@@ -59,6 +59,7 @@
 defineOptions({ name: 'HomeView' });
 import { ref, computed, onMounted } from 'vue'
 import { getProducts } from '@/api/product'
+import request from '@/api/request'
 import ProductCard from '@/components/ProductCard.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import BannerSwiper from '@/components/BannerSwiper.vue'
@@ -74,10 +75,7 @@ const activeCategory = ref('')
 
 const noticeText = ref('平台上线庆典：全场商品满 299 顺丰包邮，新人注册即送 50 元无门槛券！')
 
-const bannerList = ref([
-  { title: '探索边界 · 释放真我', desc: '高端私密好物，隐私发货', btnText: '立即选购', bg: 'linear-gradient(135deg, #1e3a8a, #3b82f6)' },
-  { title: '新人专享 · 首单立减', desc: '注册即送 50 元无门槛优惠券', btnText: '马上领取', bg: 'linear-gradient(135deg, #be123c, #f43f5e)' }
-])
+const bannerList = ref([])
 
 const categories = ref([
   { name: '全部', color: '#3b82f6' },

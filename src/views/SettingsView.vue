@@ -10,8 +10,7 @@
       <!-- 1. 账号与安全 -->
       <div class="section-title">账号与安全</div>
       <div class="section">
-        <div class="item" @click="$router.push('/profile')"><span>个人信息</span><span class="val">查看 &gt;</span></div>
-        <div class="item" @click="$router.push('/security')"><span>账号与安全</span><span class="val">密码/绑定 &gt;</span></div>
+        <div class="item" @click="$router.push('/security')"><span>个人信息与安全</span><span class="val">查看 &gt;</span></div>
         <div class="item" @click="$router.push('/pay-settings')"><span>支付设置</span><span class="val">支付宝/微信/海外 &gt;</span></div>
       </div>
 

@@ -1,7 +1,7 @@
 <template>
   <div class="container orders-page">
     
-    <!-- 1. 头部：个人信息卡片 -->
+    <!-- 1. 头部：个人信息卡片 (增加顶部间距防止被导航栏盖住) -->
     <div class="profile-card">
       <div class="p-top">
         <img :src="myAvatar" class="p-avatar" />
@@ -9,24 +9,28 @@
           <h3 class="p-name">{{ myNickname }}</h3>
           <p class="p-role" v-if="userInfo.role === 'super' || userInfo.role === 'admin'">尊贵的管理员</p>
         </div>
+        <!-- 退出登录改成右上角的齿轮/设置图标 -->
+        <div class="settings-icon" @click="handleLogout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span>退出</span>
+        </div>
       </div>
       
       <!-- 快捷功能入口 -->
       <div class="p-links">
-        <span @click="showToast('暂未开放')">收货地址</span>
-        <span @click="showToast('暂未开放')">账号与安全</span>
-        <span @click="showToast('暂未开放')">联系客服</span>
+        <span @click="$router.push('/address?title=收货地址')">收货地址</span>
+        <span @click="$router.push('/security?title=账号与安全')">账号与安全</span>
+        <span @click="showToast('客服微信: lynli_boss')">联系客服</span>
       </div>
     </div>
 
-    <!-- 2. 我的订单（带状态分类） -->
+    <!-- 2. 我的订单 -->
     <div class="section">
       <div class="section-header">
         <h3>我的订单</h3>
         <span class="all-orders" @click="currentTab = 'all'">全部订单 &gt;</span>
       </div>
 
-      <!-- 订单状态图标导航 (纯SVG) -->
       <div class="order-nav">
         <div class="nav-item" @click="currentTab = 'unpaid'">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
@@ -50,7 +54,6 @@
         </div>
       </div>
 
-      <!-- 订单列表展示区 -->
       <div class="order-content">
         <div v-if="loading" class="loading">加载中...</div>
         <div v-else-if="filteredList.length === 0" class="empty-orders">
@@ -73,29 +76,24 @@
       </div>
     </div>
 
-    <!-- 3. 我的资产 / 工具区 (纯SVG) -->
+    <!-- 3. 我的资产 / 工具区 (全部带跳转) -->
     <div class="section tools-section">
-      <div class="tool-item" @click="showToast('功能开发中')">
+      <div class="tool-item" @click="$router.push('/coupons?title=我的优惠券')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16v12H4z"/><path d="M4 10h16"/><path d="M8 15h4"/></svg>
         <span>优惠券</span>
       </div>
-      <div class="tool-item" @click="showToast('功能开发中')">
+      <div class="tool-item" @click="$router.push('/points?title=我的积分')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         <span>积分</span>
       </div>
-      <div class="tool-item" @click="showToast('功能开发中')">
+      <div class="tool-item" @click="$router.push('/favorites?title=我的收藏')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         <span>收藏</span>
       </div>
-      <div class="tool-item" @click="showToast('功能开发中')">
+      <div class="tool-item" @click="$router.push('/favorites?title=浏览足迹')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <span>足迹</span>
       </div>
-    </div>
-
-    <!-- 4. 退出登录 -->
-    <div class="logout-section">
-      <button class="logout-btn" @click="handleLogout">退出登录</button>
     </div>
 
   </div>
@@ -163,41 +161,46 @@ async function load() {
 }
 
 function handleLogout() {
-  localStorage.removeItem('token')
-  localStorage.removeItem('userInfo')
-  if (Toast && Toast.success) Toast.success('已退出登录')
-  router.push('/auth')
+  if(confirm('确定要退出登录吗？')) {
+    localStorage.removeItem('token')
+    localStorage.removeItem('userInfo')
+    if (Toast && Toast.success) Toast.success('已退出登录')
+    router.push('/auth')
+  }
 }
 
 onMounted(load)
 </script>
 
 <style scoped>
-.orders-page { padding-top: 20px; padding-bottom: 40px; background: #f5f7fa; min-height: 100vh; }
+/* 核心修改：增加了 padding-top，防止被顶部导航栏遮挡 */
+.orders-page { padding-top: 76px; padding-bottom: 40px; background: #f5f7fa; min-height: 100vh; }
 
-/* 头部卡片 */
-.profile-card { background: linear-gradient(135deg, #3b82f6, #1e3a8a); border-radius: 20px; padding: 24px; color: #fff; box-shadow: 0 10px 20px rgba(59,130,246,0.2); margin-bottom: 16px; }
+.profile-card { position: relative; background: linear-gradient(135deg, #3b82f6, #1e3a8a); border-radius: 20px; padding: 24px; color: #fff; box-shadow: 0 10px 20px rgba(59,130,246,0.2); margin-bottom: 16px; }
 .p-top { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
 .p-avatar { width: 68px; height: 68px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); object-fit: cover; }
 .p-info { display: flex; flex-direction: column; gap: 6px; }
 .p-name { font-size: 22px; font-weight: bold; margin: 0; }
 .p-role { font-size: 12px; background: rgba(255,255,255,0.2); display: inline-block; padding: 3px 10px; border-radius: 12px; margin: 0; width: fit-content; }
+
+/* 退出按钮改成右上角小巧的图标 */
+.settings-icon { position: absolute; top: 24px; right: 20px; display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; }
+.settings-icon:hover { opacity: 1; }
+.settings-icon svg { width: 14px; height: 14px; }
+
 .p-links { display: flex; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.9); border-top: 1px solid rgba(255,255,255,0.2); padding-top: 16px; }
 .p-links span { cursor: pointer; }
 
-/* 通用白底区块 */
 .section { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .section-header h3 { margin: 0; font-size: 16px; color: #1e293b; font-weight: bold; }
 .all-orders { font-size: 13px; color: #94a3b8; cursor: pointer; }
 
-/* 订单状态图标 */
 .order-nav { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; }
 .nav-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; color: #475569; font-size: 13px; transition: color 0.2s; }
 .nav-item:hover { color: #3b82f6; }
 .nav-item svg { width: 26px; height: 26px; }
 
-/* 订单列表 */
 .order-content { min-height: 120px; }
 .loading { text-align: center; padding: 20px 0; color: #94a3b8; font-size: 14px; }
 .empty-orders { text-align: center; padding: 20px 0; color: #94a3b8; font-size: 14px; }
@@ -209,14 +212,8 @@ onMounted(load)
 .o-foot { display: flex; justify-content: space-between; font-size: 13px; color: #94a3b8; }
 .o-amount { color: #f59e0b; font-weight: bold; font-size: 15px; }
 
-/* 工具区 */
 .tools-section { display: flex; justify-content: space-around; padding: 24px 10px; }
 .tool-item { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; color: #475569; cursor: pointer; transition: color 0.2s; }
 .tool-item:hover { color: #3b82f6; }
 .tool-item svg { width: 24px; height: 24px; }
-
-/* 退出登录 */
-.logout-section { margin-top: 24px; }
-.logout-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; background: #fee2e2; color: #ef4444; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-.logout-btn:hover { background: #fecaca; }
 </style>

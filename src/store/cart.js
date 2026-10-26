@@ -1,93 +1,88 @@
-import { ref, computed } from 'vue'
+import { reactive, computed } from 'vue'
 
 // 从本地存储读取初始购物车数据
 const storedCart = localStorage.getItem('cart_items')
-export const cartItems = ref(storedCart ? JSON.parse(storedCart) : [])
+const initialItems = storedCart ? JSON.parse(storedCart) : []
 
-// 🔥 关键别名：你的代码里叫 cart，这里给它个名字
-export const cart = cartItems
+// 严格适配 CartView.vue 需要的 `cart.items` 结构
+export const cart = reactive({
+  items: initialItems
+})
 
-// 确保历史数据里有 selected 属性
-cartItems.value.forEach(item => {
+// 兼容老数据
+cart.items.forEach(item => {
   if (item.selected === undefined) item.selected = true
+  if (item.qty === undefined) item.qty = item.quantity || 1
 })
 
 const saveCart = () => {
-  localStorage.setItem('cart_items', JSON.stringify(cartItems.value))
+  localStorage.setItem('cart_items', JSON.stringify(cart.items))
 }
 
-// 购物车总数量
-export const totalCount = computed(() => {
-  return cartItems.value.reduce((sum, item) => sum + item.quantity, 0)
+// 🔥 修改数量 (对应 updateQty)
+export const updateQty = (id, qty) => {
+  const item = cart.items.find(i => i.id === id)
+  if (item && qty > 0) {
+    item.qty = qty
+    saveCart()
+  }
+}
+
+// 🔥 移除商品
+export const removeFromCart = (id) => {
+  cart.items = cart.items.filter(i => i.id !== id)
+  saveCart()
+}
+
+// 🔥 单个选中 (对应 setSelected)
+export const setSelected = (id, val) => {
+  const item = cart.items.find(i => i.id === id)
+  if (item) {
+    item.selected = val
+    saveCart()
+  }
+}
+
+// 🔥 全选 (对应 setSelectAll)
+export const setSelectAll = (val) => {
+  cart.items.forEach(i => i.selected = val)
+  saveCart()
+}
+
+// 🔥 清空购物车
+export const clearCart = () => {
+  cart.items = []
+  saveCart()
+}
+
+// 🔥 计算属性：是否全选
+export const allSelected = computed(() => {
+  return cart.items.length > 0 && cart.items.every(i => i.selected !== false)
 })
 
-// 添加商品
+// 🔥 计算属性：选中总金额
+export const selectedTotal = computed(() => {
+  return cart.items.filter(i => i.selected !== false).reduce((sum, i) => sum + (i.price * i.qty), 0)
+})
+
+// 兼容其他页面（如 ProductCard.vue 和 BottomNav.vue）的导出
 export const addToCart = (product, quantity = 1) => {
-  const existingItem = cartItems.value.find(item => item.id === product.id)
-  if (existingItem) {
-    existingItem.quantity += quantity
+  const existing = cart.items.find(i => i.id === product.id)
+  if (existing) {
+    existing.qty += quantity
   } else {
-    cartItems.value.push({
+    cart.items.push({
       id: product.id,
-      name: product.name || product.title,
+      title: product.title || product.name,
       price: product.price,
       image: product.image || product.cover,
-      quantity: quantity,
+      qty: quantity,
       selected: true
     })
   }
   saveCart()
 }
 
-// 移除商品
-export const removeFromCart = (productId) => {
-  cartItems.value = cartItems.value.filter(item => item.id !== productId)
-  saveCart()
-}
-
-// 🔥 修改数量 (你代码里叫 updateQty)
-export const updateQty = (productId, qty) => {
-  const item = cartItems.value.find(item => item.id === productId)
-  if (item && qty > 0) {
-    item.quantity = qty
-    saveCart()
-  }
-}
-
-// 清空购物车
-export const clearCart = () => {
-  cartItems.value = []
-  saveCart()
-}
-
-// 计算选中的商品列表
-export const selectedItems = computed(() => {
-  return cartItems.value.filter(item => item.selected)
+export const totalCount = computed(() => {
+  return cart.items.reduce((sum, item) => sum + item.qty, 0)
 })
-
-// 计算选中的商品总数量
-export const selectedCount = computed(() => {
-  return selectedItems.value.reduce((sum, item) => sum + item.quantity, 0)
-})
-
-// 计算选中的商品总金额
-export const selectedTotal = computed(() => {
-  return selectedItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-})
-
-// 全选/取消全选
-export const setSelectAll = (val) => {
-  cartItems.value.forEach(item => {
-    item.selected = val
-  })
-  saveCart()
-}
-
-// 改变单个商品的选中状态 (兼容 updateSelected)
-export const updateSelected = (productId, val) => {
-  const item = cartItems.value.find(item => item.id === productId)
-  if (item) {
-    item.selected = val
-    saveCart()
-  }
-}

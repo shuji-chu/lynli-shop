@@ -1,6 +1,7 @@
 <template>
-  <div class="container orders-page">
-    <!-- 1. 顶部通栏个人信息卡片 -->
+  <!-- 留出顶部导航栏的高度 -->
+  <div class="orders-page">
+    <!-- 1. 顶部个人信息卡片 -->
     <div class="profile-header">
       <div class="p-top">
         <img :src="myAvatar" class="p-avatar" />
@@ -48,16 +49,14 @@
       </div>
     </div>
 
-    <!-- 🚨 3. 新增：镶嵌在下面的功能菜单列表 -->
+    <!-- 3. 底部菜单列表 -->
     <div class="section menu-list">
       <div class="menu-item" @click="$router.push('/address')">
         <div class="m-left">
           <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <span>收货地址</span>
         </div>
-        <div class="m-right">
-          <span class="arrow">&gt;</span>
-        </div>
+        <div class="m-right"><span class="arrow">&gt;</span></div>
       </div>
 
       <div class="menu-item" @click="$router.push('/api-platform')">
@@ -65,9 +64,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
           <span>开发者 / 商户 API 平台</span>
         </div>
-        <div class="m-right">
-          <span class="arrow">&gt;</span>
-        </div>
+        <div class="m-right"><span class="arrow">&gt;</span></div>
       </div>
 
       <div class="menu-item" @click="$router.push('/pay-settings')">
@@ -75,9 +72,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
           <span>支持的支付方式</span>
         </div>
-        <div class="m-right">
-          <span class="arrow">&gt;</span>
-        </div>
+        <div class="m-right"><span class="arrow">&gt;</span></div>
       </div>
 
       <div class="menu-item" @click="$router.push('/help')">
@@ -85,9 +80,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           <span>帮助与反馈</span>
         </div>
-        <div class="m-right">
-          <span class="arrow">&gt;</span>
-        </div>
+        <div class="m-right"><span class="arrow">&gt;</span></div>
       </div>
     </div>
   </div>
@@ -125,8 +118,14 @@ onMounted(load)
 </script>
 
 <style scoped>
-/* 页面底层底色 */
-.orders-page { padding-top: 56px; padding-top: 64px; background: #f5f7fa; min-height: 100vh; padding-bottom: 40px; }
+/* 留出顶部导航栏的高度 */
+.orders-page { 
+  padding-top: 56px; 
+  padding-bottom: 80px; 
+  background: #f5f7fa; 
+  min-height: 100vh; 
+  box-sizing: border-box;
+}
 
 /* 顶部通栏渐变卡片 */
 .profile-header { 
@@ -165,7 +164,7 @@ onMounted(load)
 .nav-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; color: #475569; font-size: 13px; }
 .nav-item svg { width: 28px; height: 28px; stroke-width: 1.8; }
 
-/* 🚨 新增：菜单列表样式 */
+/* 菜单列表样式 */
 .menu-list { padding: 0 20px; }
 .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
 .menu-item:last-child { border-bottom: none; }

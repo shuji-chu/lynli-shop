@@ -4,7 +4,10 @@ import { ref, computed } from 'vue'
 const storedCart = localStorage.getItem('cart_items')
 export const cartItems = ref(storedCart ? JSON.parse(storedCart) : [])
 
-// 确保历史数据里有 selected 属性，默认选中
+// 🔥 关键别名：你的代码里叫 cart，这里给它个名字
+export const cart = cartItems
+
+// 确保历史数据里有 selected 属性
 cartItems.value.forEach(item => {
   if (item.selected === undefined) item.selected = true
 })
@@ -30,7 +33,7 @@ export const addToCart = (product, quantity = 1) => {
       price: product.price,
       image: product.image || product.cover,
       quantity: quantity,
-      selected: true // 默认选中
+      selected: true
     })
   }
   saveCart()
@@ -40,6 +43,15 @@ export const addToCart = (product, quantity = 1) => {
 export const removeFromCart = (productId) => {
   cartItems.value = cartItems.value.filter(item => item.id !== productId)
   saveCart()
+}
+
+// 🔥 修改数量 (你代码里叫 updateQty)
+export const updateQty = (productId, qty) => {
+  const item = cartItems.value.find(item => item.id === productId)
+  if (item && qty > 0) {
+    item.quantity = qty
+    saveCart()
+  }
 }
 
 // 清空购物车
@@ -71,7 +83,7 @@ export const setSelectAll = (val) => {
   saveCart()
 }
 
-// 改变单个商品的选中状态
+// 改变单个商品的选中状态 (兼容 updateSelected)
 export const updateSelected = (productId, val) => {
   const item = cartItems.value.find(item => item.id === productId)
   if (item) {

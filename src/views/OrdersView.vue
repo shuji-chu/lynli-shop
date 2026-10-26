@@ -1,207 +1,133 @@
 <template>
-  <div class="container orders">
-    <h2 class="section-title">我的订单</h2>
-
-    <div v-if="!isLoggedIn" class="empty">
-      <p>请先登录后查看订单</p>
-      <router-link to="/auth" class="btn-gold">去登录</router-link>
+  <div class="container orders-page">
+    
+    <!-- 个人中心头部卡片 -->
+    <div class="profile-card">
+      <img :src="myAvatar" class="p-avatar" />
+      <div class="p-info">
+        <h3 class="p-name">{{ myNickname }}</h3>
+        <p class="p-email">{{ myEmail }}</p>
+        <p class="p-role" v-if="userInfo.role === 'super' || userInfo.role === 'admin'">尊贵的管理员</p>
+      </div>
     </div>
 
-    <div v-else-if="loading" class="loading">
-      <div v-for="n in 3" :key="n" class="skeleton row-skel"></div>
-    </div>
+    <!-- 订单模块 -->
+    <div class="section">
+      <div class="section-header">
+        <h3>我的订单</h3>
+        <span class="all-orders">全部订单 ></span>
+      </div>
+      
+      <div v-if="loading" class="loading">加载中...</div>
+      
+      <div v-else-if="!list.length" class="empty-orders">
+        <p>暂无订单记录</p>
+        <button @click="$router.push('/shop')" class="go-shop-btn">去逛逛</button>
+      </div>
 
-    <div v-else-if="!list.length && !failed" class="empty">
-      <p>暂无订单</p>
-      <router-link to="/" class="btn-gold">去逛逛</router-link>
-    </div>
-
-    <div v-else-if="failed" class="state-box">
-      <p class="state-icon">🛰️</p>
-      <p class="state-title">订单加载失败</p>
-      <p class="state-desc">可能是网络波动或接口跨域被拦截，请重试。</p>
-      <button class="btn-gold" @click="load">重新加载</button>
-    </div>
-
-    <ul v-else class="list">
-      <li v-for="o in list" :key="o.id || o.trade_no" class="order panel">
-        <div class="head">
-          <span class="no">订单号：{{ o.trade_no || o.id }}</span>
-          <span class="status" :class="statusClass(o.status)">{{ statusText(o.status) }}</span>
-        </div>
-        <div class="goods">
-          <div v-for="g in o.items || o.goods || []" :key="g.id || g.sku" class="good">
-            <img :src="g.image || g.image_url || g.cover" :alt="g.title || g.name" loading="lazy" @error="onErr" />
-            <div class="g-info">
-              <p class="g-name">{{ g.title || g.name }}</p>
-              <p class="g-qty">×{{ g.qty || 1 }}</p>
-            </div>
+      <ul v-else class="order-list">
+        <li v-for="o in list" :key="o.id || o.trade_no" class="order-item">
+          <div class="o-head">
+            <span>订单号：{{ o.trade_no || o.id }}</span>
+            <span class="o-status">{{ o.status }}</span>
           </div>
-        </div>
-        <div class="foot">
-          <span class="time">{{ formatTime(o.created_at || o.create_time) }}</span>
-          <span class="amount">合计 {{ formatPrice(o.amount || o.total) }}</span>
-        </div>
-      </li>
-    </ul>
+          <div class="o-foot">
+            <span>{{ formatTime(o.created_at) }}</span>
+            <span class="o-amount">合计：¥{{ o.amount }}</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 退出登录 -->
+    <div class="logout-section">
+      <button class="logout-btn" @click="handleLogout">退出登录</button>
+    </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { isLoggedIn } from '@/store/user'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { Toast } from '@/utils/toast'
 import { getMyOrders } from '@/api/order'
-import { formatPrice, formatTime } from '@/utils/format'
 
+const router = useRouter()
 const list = ref([])
 const loading = ref(true)
-const failed = ref(false)
 
-const STATUS_MAP = {
-  pending: ['待支付', 'pending'],
-  unpaid: ['待支付', 'pending'],
-  paid: ['已支付', 'paid'],
-  paided: ['已支付', 'paid'],
-  shipped: ['已发货', 'shipped'],
-  completed: ['已完成', 'completed'],
-  done: ['已完成', 'completed'],
-  closed: ['已关闭', 'closed'],
-  expired: ['已关闭', 'closed']
-}
+const userInfo = computed(() => {
+  const data = localStorage.getItem('userInfo')
+  if (!data) return {}
+  try { return JSON.parse(data) } catch (e) { return {} }
+})
 
-function statusText(s) {
-  return (STATUS_MAP[s] && STATUS_MAP[s][0]) || '未知'
-}
-function statusClass(s) {
-  return (STATUS_MAP[s] && STATUS_MAP[s][1]) || 'unknown'
-}
+const myAvatar = computed(() => userInfo.value.avatar || 'https://api.dicebear.com/7.x/initials/svg?seed=lynli&backgroundColor=3b82f6&textColor=ffffff')
+const myNickname = computed(() => userInfo.value.nickname || userInfo.value.email?.split('@')[0] || '用户')
+const myEmail = computed(() => userInfo.value.email || '未绑定邮箱')
 
-function normalize(res) {
-  if (Array.isArray(res)) return res
-  if (res && Array.isArray(res.list)) return res.list
-  if (res && Array.isArray(res.items)) return res.items
-  if (res && Array.isArray(res.data)) return res.data
-  if (res && Array.isArray(res.orders)) return res.orders
-  return []
-}
-
-function onErr(e) {
-  e.target.style.visibility = 'hidden'
+function formatTime(ts) {
+  if (!ts) return ''
+  const d = new Date(Number(ts) * 1000)
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`
 }
 
 async function load() {
-  if (!isLoggedIn.value) {
-    loading.value = false
+  if (!localStorage.getItem('token')) {
+    router.push('/auth')
     return
   }
   loading.value = true
-  failed.value = false
   try {
     const res = await getMyOrders()
-    list.value = normalize(res)
-  } catch {
-    list.value = []
-    failed.value = true
+    if (res && Array.isArray(res.data)) {
+      list.value = res.data
+    } else if (Array.isArray(res)) {
+      list.value = res
+    }
+  } catch (e) {
+    console.warn('获取订单失败', e)
   } finally {
     loading.value = false
   }
+}
+
+function handleLogout() {
+  localStorage.removeItem('token')
+  localStorage.removeItem('userInfo')
+  Toast.success('已退出登录')
+  router.push('/auth')
 }
 
 onMounted(load)
 </script>
 
 <style scoped>
-.orders {
-  padding-top: 24px;
-}
-.empty {
-  text-align: center;
-  padding: 90px 0;
-  color: var(--text-3);
-}
-.empty .btn-gold {
-  margin-top: 18px;
-}
-.loading {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.row-skel {
-  height: 110px;
-  border-radius: var(--radius);
-}
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.order {
-  padding: 16px;
-}
-.head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  color: var(--text-3);
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-}
-.status {
-  font-weight: 600;
-  color: var(--gold);
-}
-.status.paid {
-  color: var(--ok);
-}
-.status.shipped,
-.status.completed {
-  color: var(--gold-bright);
-}
-.status.closed {
-  color: var(--text-3);
-}
-.goods {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 14px 0;
-}
-.good {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-.good img {
-  width: 54px;
-  height: 54px;
-  border-radius: 10px;
-  object-fit: cover;
-  flex: 0 0 auto;
-  background: rgba(255, 255, 255, 0.04);
-}
-.g-name {
-  font-size: 14px;
-  font-weight: 600;
-}
-.g-qty {
-  font-size: 12px;
-  color: var(--text-3);
-  margin-top: 2px;
-}
-.foot {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  color: var(--text-3);
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-.amount {
-  color: var(--gold-bright);
-  font-weight: 700;
-  font-size: 16px;
-}
+.orders-page { padding-top: 20px; padding-bottom: 40px; }
+.profile-card { background: linear-gradient(135deg, #3b82f6, #1e3a8a); border-radius: 20px; padding: 24px; display: flex; align-items: center; gap: 16px; color: #fff; box-shadow: 0 10px 20px rgba(59,130,246,0.2); margin-bottom: 24px; }
+.p-avatar { width: 64px; height: 64px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); object-fit: cover; }
+.p-info { display: flex; flex-direction: column; gap: 4px; }
+.p-name { font-size: 20px; font-weight: bold; margin: 0; }
+.p-email { font-size: 13px; color: rgba(255,255,255,0.8); margin: 0; }
+.p-role { font-size: 11px; background: rgba(255,255,255,0.2); display: inline-block; padding: 2px 8px; border-radius: 10px; margin-top: 4px; }
+
+.section { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.section-header h3 { margin: 0; font-size: 16px; color: #1e293b; }
+.all-orders { font-size: 13px; color: #94a3b8; }
+
+.empty-orders { text-align: center; padding: 30px 0; color: #94a3b8; font-size: 14px; }
+.go-shop-btn { margin-top: 12px; background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; padding: 8px 24px; border-radius: 20px; cursor: pointer; }
+
+.order-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.order-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; }
+.o-head { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 10px; }
+.o-status { color: #3b82f6; font-weight: bold; }
+.o-foot { display: flex; justify-content: space-between; font-size: 13px; color: #94a3b8; }
+.o-amount { color: #f59e0b; font-weight: bold; font-size: 15px; }
+
+.logout-section { margin-top: 30px; }
+.logout-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; background: #fee2e2; color: #ef4444; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+.logout-btn:hover { background: #fecaca; }
 </style>
